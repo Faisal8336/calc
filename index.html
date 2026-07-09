@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>متتبع التغذية والوزن</title>
+  <link rel="stylesheet" href="styles.css">
+  <script async src="https://cdn.jsdelivr.net/npm/chart.js" onload="window.dispatchEvent(new Event('charts-ready'))"></script>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="التنقل الرئيسي">
+      <div class="brand">
+        <div class="brand-mark">ك</div>
+        <div>
+          <h1>حاسبة سعرات</h1>
+          <p>تغذية، وزن، وتقدم</p>
+        </div>
+      </div>
+
+      <button class="theme-toggle" id="themeToggle" type="button" aria-label="تبديل الوضع الليلي">الوضع الليلي</button>
+
+      <nav class="nav-list">
+        <button class="nav-item active" data-view="dashboard">لوحة التحكم</button>
+        <button class="nav-item" data-view="daily">تسجيل اليوم</button>
+        <button class="nav-item" data-view="foods">مكتبة الأطعمة</button>
+        <button class="nav-item" data-view="weight">الوزن والقياسات</button>
+        <button class="nav-item" data-view="reports">التقارير</button>
+        <button class="nav-item" data-view="settings">الأهداف</button>
+      </nav>
+    </aside>
+
+    <main class="content">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">1886.89@</p>
+          <h2 id="viewTitle">لوحة التحكم</h2>
+        </div>
+        <div class="date-pill" id="todayLabel"></div>
+      </header>
+
+      <section class="view active" id="dashboard">
+        <div class="summary-grid">
+          <article class="metric-card">
+            <span>سعرات اليوم</span>
+            <strong id="todayCalories">0</strong>
+            <small id="todayCaloriesHint">من هدفك اليومي</small>
+          </article>
+          <article class="metric-card">
+            <span>المتبقي اليوم</span>
+            <strong id="remainingCalories">0</strong>
+            <small>سعرة حرارية</small>
+          </article>
+          <article class="metric-card">
+            <span>البروتين</span>
+            <strong id="proteinProgress">0%</strong>
+            <small id="proteinHint">من الهدف</small>
+          </article>
+          <article class="metric-card">
+            <span>أيام التسجيل المتتالية</span>
+            <strong id="streakCount">0</strong>
+            <small>يوم</small>
+          </article>
+        </div>
+
+        <div class="dashboard-grid">
+          <section class="panel">
+            <div class="panel-heading">
+              <h3>الماكروز اليوم</h3>
+              <p>بروتين، كاربوهيدرات، ودهون</p>
+            </div>
+            <div class="macro-bars" id="macroBars"></div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-heading">
+              <h3>السعرات الأسبوعية</h3>
+              <p id="weeklyHint">ملخص آخر 7 أيام</p>
+            </div>
+            <div class="chart-box"><canvas id="weeklyCaloriesChart"></canvas></div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-heading">
+              <h3>تغير الوزن</h3>
+              <p id="weightForecast">أضف وزنًا لعرض التوقعات</p>
+            </div>
+            <div class="chart-box"><canvas id="weightChart"></canvas></div>
+          </section>
+
+          <section class="panel today-list">
+            <div class="panel-heading">
+              <h3>وجبات اليوم</h3>
+              <p id="mealCount">لا توجد وجبات بعد</p>
+            </div>
+            <div id="todayMeals"></div>
+          </section>
+        </div>
+      </section>
+
+      <section class="view" id="daily">
+        <div class="form-layout">
+          <section class="panel">
+            <div class="panel-heading">
+              <h3>إضافة وجبة</h3>
+              <p>سجل طعامًا جديدًا أو اختر من مكتبتك</p>
+            </div>
+            <form id="mealForm" class="stack-form">
+              <label>التاريخ
+                <input type="date" id="mealDate" required>
+              </label>
+              <label>اسم الوجبة
+                <input type="text" id="mealName" placeholder="مثال: صدر دجاج مع أرز" required>
+              </label>
+              <div class="field-grid">
+                <label>السعرات
+                  <input type="number" id="mealCalories" min="0" step="1" required>
+                </label>
+                <label>البروتين
+                  <input type="number" id="mealProtein" min="0" step="0.1" required>
+                </label>
+                <label>الكارب
+                  <input type="number" id="mealCarbs" min="0" step="0.1" required>
+                </label>
+                <label>الدهون
+                  <input type="number" id="mealFat" min="0" step="0.1" required>
+                </label>
+              </div>
+              <label class="checkbox-row">
+                <input type="checkbox" id="saveFood">
+                حفظها في مكتبة الأطعمة
+              </label>
+              <button class="primary-btn" type="submit">إضافة الوجبة</button>
+            </form>
+          </section>
+
+          <section class="panel">
+            <div class="panel-heading">
+              <h3>إضافة سريعة</h3>
+              <p>من الأطعمة المحفوظة</p>
+            </div>
+            <div class="quick-foods" id="quickFoods"></div>
+          </section>
+        </div>
+      </section>
+
+      <section class="view" id="foods">
+        <div class="form-layout">
+          <section class="panel">
+            <div class="panel-heading">
+              <h3>طعام محفوظ جديد</h3>
+              <p>أنشئ مكتبتك الشخصية</p>
+            </div>
+            <form id="foodForm" class="stack-form">
+              <label>اسم الطعام
+                <input type="text" id="foodName" required>
+              </label>
+              <div class="field-grid">
+                <label>السعرات
+                  <input type="number" id="foodCalories" min="0" step="1" required>
+                </label>
+                <label>البروتين
+                  <input type="number" id="foodProtein" min="0" step="0.1" required>
+                </label>
+                <label>الكارب
+                  <input type="number" id="foodCarbs" min="0" step="0.1" required>
+                </label>
+                <label>الدهون
+                  <input type="number" id="foodFat" min="0" step="0.1" required>
+                </label>
+              </div>
+              <button class="primary-btn" type="submit">حفظ الطعام</button>
+            </form>
+          </section>
+
+          <section class="panel">
+            <div class="panel-heading">
+              <h3>مكتبة الأطعمة</h3>
+              <p id="foodsCount">0 عنصر</p>
+            </div>
+            <div class="item-list" id="foodsList"></div>
+          </section>
+        </div>
+      </section>
+
+      <section class="view" id="weight">
+        <div class="form-layout">
+          <section class="panel">
+            <div class="panel-heading">
+              <h3>تسجيل الوزن</h3>
+              <p>تابع التغير بمرور الوقت</p>
+            </div>
+            <form id="weightForm" class="stack-form">
+              <label>التاريخ
+                <input type="date" id="weightDate" required>
+              </label>
+              <label>الوزن بالكيلو
+                <input type="number" id="weightValue" min="20" step="0.1" required>
+              </label>
+              <button class="primary-btn" type="submit">حفظ الوزن</button>
+            </form>
+          </section>
+
+          <section class="panel">
+            <div class="panel-heading">
+              <h3>قياسات الجسم</h3>
+              <p>اختياري، بالسنتيمتر</p>
+            </div>
+            <form id="measurementForm" class="stack-form">
+              <label>التاريخ
+                <input type="date" id="measurementDate" required>
+              </label>
+              <div class="field-grid">
+                <label>الخصر
+                  <input type="number" id="waist" min="0" step="0.1">
+                </label>
+                <label>الصدر
+                  <input type="number" id="chest" min="0" step="0.1">
+                </label>
+                <label>الذراع
+                  <input type="number" id="arm" min="0" step="0.1">
+                </label>
+                <label>الفخذ
+                  <input type="number" id="thigh" min="0" step="0.1">
+                </label>
+              </div>
+              <button class="primary-btn" type="submit">حفظ القياسات</button>
+            </form>
+          </section>
+        </div>
+
+        <section class="panel wide-panel">
+          <div class="panel-heading">
+            <h3>سجل الوزن</h3>
+            <p id="weightCount">لا توجد أوزان بعد</p>
+          </div>
+          <div class="item-list" id="weightHistory"></div>
+        </section>
+
+        <section class="panel wide-panel">
+          <div class="panel-heading">
+            <h3>تغير القياسات</h3>
+            <p>آخر السجلات حسب التاريخ</p>
+          </div>
+          <div class="chart-box compact"><canvas id="measurementsChart"></canvas></div>
+        </section>
+      </section>
+
+      <section class="view" id="reports">
+        <div class="report-grid">
+          <article class="metric-card">
+            <span>متوسط السعرات الأسبوعي</span>
+            <strong id="avgWeeklyCalories">0</strong>
+            <small>سعرة / يوم</small>
+          </article>
+          <article class="metric-card">
+            <span>متوسط البروتين</span>
+            <strong id="avgProtein">0</strong>
+            <small>جرام / يوم</small>
+          </article>
+          <article class="metric-card">
+            <span>أعلى يوم سعرات</span>
+            <strong id="highestDay">-</strong>
+            <small id="highestDayHint">لا توجد بيانات</small>
+          </article>
+          <article class="metric-card">
+            <span>نسبة الالتزام</span>
+            <strong id="adherenceRate">0%</strong>
+            <small>آخر 7 أيام</small>
+          </article>
+        </div>
+
+        <section class="panel wide-panel">
+          <div class="panel-heading">
+            <h3>تقرير السعرات والماكروز</h3>
+            <p>آخر 14 يومًا</p>
+          </div>
+          <div class="chart-box"><canvas id="reportChart"></canvas></div>
+        </section>
+      </section>
+
+      <section class="view" id="settings">
+        <section class="panel settings-panel">
+          <div class="panel-heading">
+            <h3>الأهداف اليومية والوزن المستهدف</h3>
+            <p>تستخدم للحسابات والتقارير</p>
+          </div>
+          <form id="settingsForm" class="stack-form">
+            <div class="field-grid">
+              <label>هدف السعرات اليومي
+                <input type="number" id="targetCalories" min="500" step="1" required>
+              </label>
+              <label>هدف البروتين
+                <input type="number" id="targetProtein" min="0" step="1" required>
+              </label>
+              <label>هدف الكارب
+                <input type="number" id="targetCarbs" min="0" step="1" required>
+              </label>
+              <label>هدف الدهون
+                <input type="number" id="targetFat" min="0" step="1" required>
+              </label>
+              <label>الوزن المستهدف
+                <input type="number" id="targetWeight" min="20" step="0.1" required>
+              </label>
+              <label>الطول الحالي
+                <input type="number" id="heightCm" min="100" step="1" required>
+              </label>
+              <label>العمر
+                <input type="number" id="age" min="10" step="1" required>
+              </label>
+              <label>الجنس
+                <select id="sex" required>
+                  <option value="male">ذكر</option>
+                  <option value="female">أنثى</option>
+                </select>
+              </label>
+              <label>النشاط اليومي
+                <select id="activityLevel" required>
+                  <option value="1.2">قليل الحركة</option>
+                  <option value="1.375">نشاط خفيف</option>
+                  <option value="1.55">نشاط متوسط</option>
+                  <option value="1.725">نشاط عالي</option>
+                  <option value="1.9">نشاط عالي جدًا</option>
+                </select>
+              </label>
+            </div>
+            <button class="primary-btn" type="submit">حفظ الأهداف</button>
+          </form>
+          <button class="danger-btn" id="clearData" type="button">حذف كل البيانات المحلية</button>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script defer src="app.js"></script>
+</body>
+</html>
