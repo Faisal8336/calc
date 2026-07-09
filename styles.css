@@ -17,19 +17,19 @@
 }
 
 body.dark {
-  --bg: #0b1110;
-  --surface: #141b19;
-  --surface-soft: #1c2823;
-  --surface-raised: #101715;
-  --text: #f2f7f4;
-  --muted: #a9b8b1;
-  --line: #293732;
-  --green: #78d6a0;
-  --green-dark: #a2e8bd;
-  --blue: #8fbee8;
-  --gold: #e7bd75;
-  --red: #f19a9a;
-  --shadow: 0 18px 45px rgba(0, 0, 0, 0.34);
+  --bg: #08110f;
+  --surface: #121d1a;
+  --surface-soft: #1d3028;
+  --surface-raised: #0d1715;
+  --text: #f3fbf6;
+  --muted: #b0c3ba;
+  --line: #28423a;
+  --green: #63e09b;
+  --green-dark: #90f1bc;
+  --blue: #79c9ff;
+  --gold: #f2bf62;
+  --red: #ff8f9b;
+  --shadow: 0 18px 45px rgba(0, 0, 0, 0.42);
   color-scheme: dark;
 }
 
@@ -179,7 +179,8 @@ button {
 body.dark .date-pill,
 body.dark .metric-card,
 body.dark .panel {
-  background: linear-gradient(180deg, var(--surface), #111816);
+  background: linear-gradient(180deg, #15231f, #101816);
+  border-color: #2a463d;
 }
 
 .view {
@@ -325,13 +326,29 @@ select {
   outline: none;
 }
 
+input[type="date"] {
+  min-height: 46px;
+  line-height: 1.35;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+input[type="date"]::-webkit-date-and-time-value {
+  min-height: 1.35em;
+  text-align: right;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  opacity: 0.72;
+}
+
 body.dark input {
-  background: #111814;
+  background: #0c1714;
   color: var(--text);
 }
 
 body.dark select {
-  background: #111814;
+  background: #0c1714;
   color: var(--text);
 }
 
@@ -390,13 +407,14 @@ select:focus {
 
 body.dark .ghost-btn,
 body.dark .theme-toggle {
-  background: #20342b;
-  color: #dbf6e5;
+  background: #1f3d31;
+  color: #dcffe9;
+  border-color: #34584b;
 }
 
 body.dark .danger-btn {
-  background: #2b1d1d;
-  border-color: #553333;
+  background: #331d24;
+  border-color: #6a3440;
 }
 
 .quick-foods,
@@ -420,7 +438,8 @@ body.dark .danger-btn {
 body.dark .list-item,
 body.dark .empty-state,
 body.dark .chart-fallback {
-  background: #141b17;
+  background: #0f1a17;
+  border-color: #29473d;
 }
 
 .list-item h4 {
