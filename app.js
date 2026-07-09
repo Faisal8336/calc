@@ -39,7 +39,8 @@ const els = {
   drawerClose: document.querySelector("#drawerClose"),
   navBackdrop: document.querySelector("#navBackdrop"),
   mobileViewTitle: document.querySelector("#mobileViewTitle"),
-  themeColor: document.querySelector('meta[name="theme-color"]')
+  themeColor: document.querySelector('meta[name="theme-color"]'),
+  appleStatusBar: document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]')
 };
 
 const viewNames = {
@@ -61,6 +62,7 @@ function init() {
   els.todayLabel.textContent = formatDateLong(today);
   fillSettingsForm();
   bindEvents();
+  registerServiceWorker();
   window.addEventListener("charts-ready", renderCharts);
   render();
 }
@@ -441,13 +443,13 @@ function chartScale() {
 function chartColors() {
   const dark = document.body.classList.contains("dark");
   return dark ? {
-    green: "#78d6a0",
-    blue: "#8fbee8",
-    gold: "#e7bd75",
-    red: "#f19a9a",
-    blueFill: "rgba(143, 190, 232, 0.14)",
-    grid: "rgba(214, 230, 220, 0.1)",
-    muted: "#b5c4ba"
+    green: "#63e09b",
+    blue: "#79c9ff",
+    gold: "#f2bf62",
+    red: "#ff8f9b",
+    blueFill: "rgba(121, 201, 255, 0.17)",
+    grid: "rgba(180, 220, 205, 0.13)",
+    muted: "#b8c9c0"
   } : {
     green: "#2f7d5b",
     blue: "#376f9e",
@@ -706,8 +708,16 @@ function showToast(message) {
 function applyTheme(theme) {
   document.body.classList.toggle("dark", theme === "dark");
   els.themeToggle.textContent = theme === "dark" ? "الوضع النهاري" : "الوضع الليلي";
-  els.themeColor.content = theme === "dark" ? "#0b1110" : "#f7f5ef";
+  els.themeColor.content = theme === "dark" ? "#08110f" : "#f7f5ef";
+  els.appleStatusBar.content = theme === "dark" ? "black-translucent" : "default";
   requestAnimationFrame(renderCharts);
+}
+
+function registerServiceWorker() {
+  if (!("serviceWorker" in navigator)) return;
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("./service-worker.js").catch(() => {});
+  });
 }
 
 function openMenu() {
