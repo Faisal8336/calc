@@ -34,7 +34,12 @@ const els = {
   weightForm: document.querySelector("#weightForm"),
   measurementForm: document.querySelector("#measurementForm"),
   settingsForm: document.querySelector("#settingsForm"),
-  themeToggle: document.querySelector("#themeToggle")
+  themeToggle: document.querySelector("#themeToggle"),
+  menuToggle: document.querySelector("#menuToggle"),
+  drawerClose: document.querySelector("#drawerClose"),
+  navBackdrop: document.querySelector("#navBackdrop"),
+  mobileViewTitle: document.querySelector("#mobileViewTitle"),
+  themeColor: document.querySelector('meta[name="theme-color"]')
 };
 
 const viewNames = {
@@ -65,11 +70,21 @@ function bindEvents() {
     button.addEventListener("click", () => switchView(button.dataset.view));
   });
 
+  els.menuToggle.addEventListener("click", openMenu);
+  els.drawerClose.addEventListener("click", closeMenu);
+  els.navBackdrop.addEventListener("click", closeMenu);
+
   els.themeToggle.addEventListener("click", () => {
     const nextTheme = document.body.classList.contains("dark") ? "light" : "dark";
     applyTheme(nextTheme);
     localStorage.setItem(THEME_KEY, nextTheme);
   });
+
+  window.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") closeMenu();
+  });
+
+  window.addEventListener("resize", debounce(renderCharts, 150));
 
   els.mealForm.addEventListener("submit", (event) => {
     event.preventDefault();
@@ -161,6 +176,8 @@ function switchView(viewId) {
   els.navItems.forEach((item) => item.classList.toggle("active", item.dataset.view === viewId));
   els.views.forEach((view) => view.classList.toggle("active", view.id === viewId));
   els.viewTitle.textContent = viewNames[viewId];
+  els.mobileViewTitle.textContent = viewNames[viewId];
+  closeMenu();
   requestAnimationFrame(renderCharts);
 }
 
@@ -272,7 +289,8 @@ function renderWeeklyCaloriesChart() {
         label: "السعرات",
         data: dates.map((date) => totalsForDate(date).calories),
         backgroundColor: colors.green,
-        borderRadius: 8
+        borderRadius: 8,
+        maxBarThickness: isMobile() ? 28 : 44
       }]
     },
     options: baseChartOptions()
@@ -291,6 +309,9 @@ function renderWeightChart() {
         data: weights.map((entry) => entry.value),
         borderColor: colors.blue,
         backgroundColor: colors.blueFill,
+        borderWidth: isMobile() ? 3 : 2,
+        pointRadius: isMobile() ? 3 : 2,
+        pointHoverRadius: 5,
         fill: true,
         tension: 0.35
       }]
@@ -333,7 +354,7 @@ function renderReportChart() {
       ...baseChartOptions(),
       scales: {
         y: chartScale(),
-        y1: { ...chartScale(), position: "right", grid: { drawOnChartArea: false } }
+        y1: { ...chartScale(), display: !isMobile(), position: "right", grid: { drawOnChartArea: false } }
       }
     }
   });
@@ -356,25 +377,64 @@ function createChart(id, config) {
 }
 
 function baseChartOptions() {
+  const mobile = isMobile();
   return {
     responsive: true,
     maintainAspectRatio: false,
+    interaction: {
+      mode: "index",
+      intersect: false
+    },
+    elements: {
+      line: {
+        borderWidth: mobile ? 3 : 2,
+        tension: 0.35
+      },
+      point: {
+        radius: mobile ? 2.5 : 2,
+        hitRadius: 14,
+        hoverRadius: 5
+      }
+    },
     plugins: {
-      legend: { labels: { color: chartColors().muted, font: { family: "Segoe UI" } } }
+      legend: {
+        position: mobile ? "bottom" : "top",
+        align: "start",
+        labels: {
+          color: chartColors().muted,
+          boxWidth: mobile ? 10 : 14,
+          padding: mobile ? 12 : 16,
+          font: { family: "Segoe UI", size: mobile ? 11 : 12 }
+        }
+      }
     },
     scales: {
       y: chartScale(),
-      x: { grid: { display: false }, ticks: { color: chartColors().muted } }
+      x: {
+        grid: { display: false },
+        ticks: {
+          color: chartColors().muted,
+          maxRotation: 0,
+          autoSkip: true,
+          maxTicksLimit: mobile ? 6 : 10
+        }
+      }
     }
   };
 }
 
 function chartScale() {
   const colors = chartColors();
+  const mobile = isMobile();
   return {
     beginAtZero: true,
     grid: { color: colors.grid },
-    ticks: { color: colors.muted }
+    border: { display: false },
+    ticks: {
+      color: colors.muted,
+      maxTicksLimit: mobile ? 5 : 7,
+      padding: mobile ? 6 : 8
+    }
   };
 }
 
@@ -646,7 +706,30 @@ function showToast(message) {
 function applyTheme(theme) {
   document.body.classList.toggle("dark", theme === "dark");
   els.themeToggle.textContent = theme === "dark" ? "الوضع النهاري" : "الوضع الليلي";
+  els.themeColor.content = theme === "dark" ? "#0b1110" : "#f7f5ef";
   requestAnimationFrame(renderCharts);
+}
+
+function openMenu() {
+  document.body.classList.add("menu-open");
+  els.menuToggle.setAttribute("aria-expanded", "true");
+}
+
+function closeMenu() {
+  document.body.classList.remove("menu-open");
+  els.menuToggle.setAttribute("aria-expanded", "false");
+}
+
+function isMobile() {
+  return window.matchMedia("(max-width: 680px)").matches;
+}
+
+function debounce(callback, delay) {
+  let timer;
+  return (...args) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => callback(...args), delay);
+  };
 }
 
 function createId() {
