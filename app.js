@@ -94,6 +94,12 @@ function bindEvents() {
   });
 
   els.fabAddMeal.addEventListener("click", () => switchView("daily"));
+  document.querySelector("#weightLogToggle")?.addEventListener("click", () => {
+    const panel = document.querySelector("#weightLogPanel");
+    if (!panel) return;
+    panel.hidden = !panel.hidden;
+    if (!panel.hidden) document.querySelector("#weightValue")?.focus();
+  });
   document.querySelector(".show-all-link")?.addEventListener("click", (event) => {
     event.preventDefault();
     switchView("daily");
@@ -215,6 +221,7 @@ function switchView(viewId) {
   els.mobileViewTitle.textContent = viewNames[viewId];
   els.appTitle.textContent = viewId === "dashboard" ? "كالي" : viewNames[viewId];
   closeMenu();
+  window.scrollTo({ top: 0, left: 0, behavior: "auto" });
   requestAnimationFrame(renderCharts);
 }
 
@@ -314,17 +321,43 @@ function renderWeightHistory() {
 function renderProgressOverview() {
   const weights = [...state.weights].sort((a, b) => a.date.localeCompare(b.date));
   const last = weights[weights.length - 1];
+  const first = weights[0];
   const previous = weights.length > 1 ? weights[weights.length - 2] : null;
   const dates = lastNDays(7);
   const totals = dates.map(totalsForDate);
   const loggedDays = totals.filter((day) => day.calories > 0);
   const avgCalories = loggedDays.length ? average(loggedDays.map((day) => day.calories)) : 0;
   const adherenceDays = totals.filter((day) => day.calories > 0 && day.calories <= state.settings.targetCalories).length;
+  const todayTotals = totalsForDate(today);
+  const calorieTarget = state.settings.targetCalories;
+  const caloriePercent = Math.min(percent(todayTotals.calories, calorieTarget), 100);
+  const steps = 0;
+  const stepsTarget = 10000;
+  const waterLiters = 0;
+  const waterTarget = 2.8;
+  const waterPercent = Math.min(percent(waterLiters, waterTarget), 100);
+  const currentWeight = last?.value || first?.value || state.settings.targetWeight;
+  const startingWeight = first?.value || currentWeight;
+  const weightDiff = last ? last.value - state.settings.targetWeight : 0;
+  const bmi = currentWeight && state.settings.heightCm ? currentWeight / ((state.settings.heightCm / 100) ** 2) : 0;
+  const bmiStatus = bmi < 18.5 ? "نحافة" : bmi < 25 ? "طبيعي" : bmi < 30 ? "زيادة الوزن" : "سمنة";
 
-  setText("#currentWeightValue", last ? `${last.value} كجم` : "-");
-  setText("#targetWeightValue", `${state.settings.targetWeight} كجم`);
-  setText("#weightDifferenceValue", last ? `${Math.abs(last.value - state.settings.targetWeight).toFixed(1)} كجم` : "-");
+  setText("#progressTodayCalories", Math.round(todayTotals.calories).toLocaleString("en-US"));
+  setText("#progressTodayCaloriesTarget", `/ ${formatCompactNumber(calorieTarget)} kcal`);
+  document.querySelector("#progressTodayCaloriesFill")?.style.setProperty("width", `${caloriePercent}%`);
+  setText("#stepsValue", steps.toLocaleString("en-US"));
+  document.querySelector("#stepsFill")?.style.setProperty("width", `${Math.min(percent(steps, stepsTarget), 100)}%`);
+  setText("#waterValue", waterLiters.toLocaleString("en-US"));
+  setText("#waterPercent", `${waterPercent}%`);
+  document.querySelector("#waterRing")?.style.setProperty("--water-progress", `${waterPercent * 3.6}deg`);
+
+  setText("#currentWeightValue", last ? last.value.toFixed(1) : "-");
+  setText("#startingWeightValue", `${startingWeight.toFixed(1)}kg`);
+  setText("#targetWeightValue", `${state.settings.targetWeight.toFixed(1)}kg`);
+  setText("#weightDifferenceValue", last ? `${weightDiff >= 0 ? "↑ +" : "↓ "}${Math.abs(weightDiff).toFixed(1)} kg` : "-");
   setText("#progressLastEntry", last ? `آخر تسجيل ${formatDateLong(last.date)}` : "لا يوجد تسجيل بعد");
+  setText("#bmiValue", bmi ? bmi.toFixed(1) : "-");
+  setText("#bmiStatus", bmi ? bmiStatus : "-");
   setText("#progressAvgCalories", Math.round(avgCalories));
   setText("#progressAdherence", `${Math.round((adherenceDays / 7) * 100)}%`);
 
@@ -341,6 +374,7 @@ function renderProgressOverview() {
 function renderCharts() {
   renderWeeklyCaloriesChart();
   renderWeightChart();
+  renderProgressWeightChart();
   renderMeasurementsChart();
   renderReportChart();
 }
@@ -384,6 +418,39 @@ function renderWeightChart() {
       }]
     },
     options: baseChartOptions()
+  });
+}
+
+function renderProgressWeightChart() {
+  const weights = [...state.weights].sort((a, b) => a.date.localeCompare(b.date));
+  const colors = chartColors();
+  const fallbackWeights = weights.length ? weights : [
+    { date: addDays(today, -6), value: state.settings.targetWeight },
+    { date: today, value: state.settings.targetWeight }
+  ];
+  createChart("progressWeightChart", {
+    type: "line",
+    data: {
+      labels: fallbackWeights.map((entry) => formatShortDate(entry.date)),
+      datasets: [{
+        label: "الوزن",
+        data: fallbackWeights.map((entry) => entry.value),
+        borderColor: colors.blue,
+        backgroundColor: colors.blueFill,
+        borderWidth: 3,
+        pointRadius: 3,
+        pointHoverRadius: 5,
+        fill: true,
+        tension: 0.28
+      }]
+    },
+    options: {
+      ...baseChartOptions(),
+      plugins: {
+        ...baseChartOptions().plugins,
+        legend: { display: false }
+      }
+    }
   });
 }
 
@@ -616,6 +683,11 @@ function formatMacroAmount(value) {
   return Number(value) % 1 === 0 ? String(Math.round(value)) : value.toFixed(1);
 }
 
+function formatCompactNumber(value) {
+  if (value >= 1000) return `${(value / 1000).toFixed(value % 1000 ? 1 : 0)}k`;
+  return String(Math.round(value));
+}
+
 function mealTemplate(meal) {
   return `
     <div class="list-item">
@@ -777,7 +849,8 @@ function readNumber(selector) {
 }
 
 function setText(selector, value) {
-  document.querySelector(selector).textContent = value;
+  const element = document.querySelector(selector);
+  if (element) element.textContent = value;
 }
 
 function percent(value, target) {
