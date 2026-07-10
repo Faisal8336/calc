@@ -160,9 +160,10 @@
                   <input type="number" id="mealFat" min="0" step="0.1" required>
                 </label>
               </div>
-              <label class="checkbox-row">
+              <label class="checkbox-row switch-row">
                 <input type="checkbox" id="saveFood">
-                حفظها في مكتبة الأطعمة
+                <span class="switch-control" aria-hidden="true"></span>
+                <span>حفظها في مكتبة الأطعمة</span>
               </label>
               <button class="primary-btn" type="submit">إضافة الوجبة</button>
             </form>
@@ -243,21 +244,9 @@
               </div>
               <div class="water-ring" id="waterRing">
                 <strong id="waterPercent">0%</strong>
-                <button class="water-add" type="button" aria-label="إضافة ماء">+</button>
+                <button class="water-add" id="waterAdd" type="button" aria-label="إضافة ماء">+</button>
               </div>
               <p><strong id="waterValue">0</strong> / 2.8L</p>
-            </article>
-
-            <article class="daily-card daily-card-steps">
-              <div class="daily-card-title">
-                <span>الخطوات</span>
-                <span aria-hidden="true">👟</span>
-              </div>
-              <div class="daily-value">
-                <strong id="stepsValue">0</strong>
-                <small>/ 10k</small>
-              </div>
-              <div class="progress-track"><div class="progress-fill" id="stepsFill"></div></div>
             </article>
           </div>
         </section>
