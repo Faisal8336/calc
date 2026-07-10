@@ -1910,3 +1910,433 @@ body[data-view="settings"] .settings-panel .panel-heading h3 {
     min-height: 190px;
   }
 }
+
+/* Production spacing pass: preserve the Cal visual language while tightening layout. */
+.content {
+  padding-bottom: calc(120px + env(safe-area-inset-bottom));
+}
+
+.view.active {
+  min-width: 0;
+}
+
+body[data-view="dashboard"] .content,
+body[data-view="weight"] .content {
+  padding-bottom: calc(120px + env(safe-area-inset-bottom));
+}
+
+body[data-view="dashboard"] .fitness-hero {
+  margin-bottom: 24px;
+}
+
+body[data-view="dashboard"] .hero-copy {
+  text-align: center;
+}
+
+body[data-view="dashboard"] .hero-greeting {
+  margin-top: 8px;
+}
+
+body[data-view="dashboard"] .hero-icon {
+  justify-self: start;
+}
+
+body[data-view="dashboard"] .week-strip {
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  grid-auto-flow: initial;
+  gap: 4px;
+  margin: 0 0 24px;
+  padding-bottom: 16px;
+  overflow: visible;
+}
+
+body[data-view="dashboard"] .week-day {
+  min-width: 0;
+  min-height: 64px;
+  gap: 8px;
+}
+
+body[data-view="dashboard"] .week-day strong {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+}
+
+body[data-view="dashboard"] .dashboard-grid {
+  gap: 24px;
+}
+
+body[data-view="dashboard"] .macro-bars {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+body[data-view="dashboard"] .macro-card {
+  display: grid;
+  align-content: space-between;
+  min-width: 0;
+  min-height: 104px;
+  padding: 12px 8px;
+  border-radius: 16px;
+  text-align: center;
+}
+
+body[data-view="dashboard"] .macro-card header {
+  gap: 8px;
+  text-align: center;
+}
+
+body[data-view="dashboard"] .macro-card header span,
+body[data-view="dashboard"] .macro-card header strong {
+  text-align: center;
+}
+
+body[data-view="dashboard"] .macro-card header span {
+  font-size: 16px;
+  line-height: 1.2;
+}
+
+body[data-view="dashboard"] .macro-card header strong {
+  font-size: 16px;
+  line-height: 1.2;
+}
+
+body[data-view="dashboard"] .macro-card .bar-track {
+  width: 100%;
+  height: 8px;
+  margin-top: 8px;
+}
+
+body[data-view="dashboard"] .today-list {
+  min-height: 0;
+  margin-top: 0;
+}
+
+body[data-view="dashboard"] .today-list .panel-heading {
+  margin: 0 0 16px;
+}
+
+#todayMeals,
+.item-list,
+.quick-foods {
+  gap: 16px;
+}
+
+.list-item {
+  min-width: 0;
+  gap: 12px;
+  padding: 16px;
+  text-align: right;
+}
+
+.list-item h4,
+.list-item p {
+  overflow-wrap: anywhere;
+}
+
+.meal-chip-row {
+  gap: 8px;
+}
+
+.bottom-nav {
+  border-radius: 32px;
+}
+
+body[data-view="weight"] #weight.view.active {
+  display: grid;
+  gap: 32px;
+}
+
+.progress-section {
+  display: grid;
+  gap: 24px;
+  min-width: 0;
+}
+
+.progress-section + .progress-section {
+  margin-top: 32px;
+}
+
+.section-heading {
+  position: relative;
+  z-index: 1;
+  margin: 32px 0 0;
+  padding: 0;
+  text-align: right;
+}
+
+.progress-section:first-child .section-heading {
+  margin-top: 0;
+}
+
+.section-heading h2 {
+  margin: 0;
+  color: var(--text);
+  font-size: 28px;
+  line-height: 1.2;
+  font-weight: 900;
+}
+
+body[data-view="weight"] .progress-hero,
+body[data-view="weight"] .form-layout,
+body[data-view="weight"] .wide-panel,
+body[data-view="weight"] .progress-stats {
+  margin: 0;
+}
+
+body[data-view="weight"] .progress-hero,
+body[data-view="weight"] .panel {
+  padding: 16px;
+  border-radius: 24px;
+}
+
+body[data-view="weight"] .panel-heading {
+  gap: 8px;
+  margin-bottom: 16px;
+  text-align: right;
+}
+
+body[data-view="weight"] .panel-heading h3 {
+  font-size: 22px;
+  line-height: 1.25;
+}
+
+body[data-view="weight"] .panel-heading p {
+  text-align: right;
+}
+
+body[data-view="weight"] .weight-overview {
+  gap: 16px;
+}
+
+body[data-view="weight"] .weight-overview div {
+  min-height: 88px;
+  padding: 16px;
+  border-radius: 16px;
+  text-align: center;
+}
+
+body[data-view="weight"] .weight-overview span {
+  margin-bottom: 8px;
+}
+
+body[data-view="weight"] .weight-overview strong {
+  display: block;
+  font-size: 24px;
+  line-height: 1.2;
+}
+
+body[data-view="weight"] .form-layout {
+  gap: 24px;
+}
+
+body[data-view="weight"] .stack-form {
+  gap: 16px;
+}
+
+body[data-view="weight"] .field-grid {
+  gap: 16px;
+}
+
+body[data-view="weight"] .wide-panel {
+  min-height: 0;
+}
+
+body[data-view="weight"] .analytics-section {
+  gap: 24px;
+}
+
+body[data-view="weight"] .progress-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+body[data-view="weight"] .progress-stats .metric-card {
+  display: grid;
+  align-content: center;
+  min-height: 104px;
+  padding: 16px;
+  border-radius: 24px;
+  text-align: center;
+}
+
+body[data-view="weight"] .progress-stats .metric-card strong {
+  margin: 8px 0 4px;
+  font-size: 28px;
+  line-height: 1;
+}
+
+body[data-view="weight"] .progress-stats .metric-card span,
+body[data-view="weight"] .progress-stats .metric-card small {
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+body[data-view="weight"] .chart-box,
+body[data-view="weight"] .chart-box.compact {
+  height: 192px;
+  min-height: 192px;
+}
+
+@media (max-width: 680px) {
+  .content,
+  body[data-view="dashboard"] .content,
+  body[data-view="weight"] .content {
+    padding-inline: max(16px, env(safe-area-inset-left)) max(16px, env(safe-area-inset-right));
+    padding-bottom: calc(120px + env(safe-area-inset-bottom));
+  }
+
+  body[data-view="dashboard"] .week-strip {
+    gap: 4px;
+  }
+
+  body[data-view="dashboard"] .macro-card {
+    min-height: 104px;
+    padding: 12px 8px;
+  }
+
+  body[data-view="weight"] .progress-stats,
+  body[data-view="weight"] .weight-overview {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 430px) {
+  .content,
+  body[data-view="dashboard"] .content,
+  body[data-view="weight"] .content {
+    max-width: 100%;
+    padding: calc(16px + env(safe-area-inset-top)) 16px calc(120px + env(safe-area-inset-bottom));
+  }
+
+  body[data-view="dashboard"] .fitness-hero {
+    grid-template-columns: 64px minmax(0, 1fr);
+    margin-bottom: 24px;
+  }
+
+  body[data-view="dashboard"] .topbar h2 {
+    font-size: 30px;
+  }
+
+  body[data-view="dashboard"] .hero-greeting {
+    font-size: 16px;
+  }
+
+  body[data-view="dashboard"] .hero-icon {
+    width: 56px;
+    height: 32px;
+  }
+
+  body[data-view="dashboard"] .week-strip {
+    gap: 4px;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+  }
+
+  body[data-view="dashboard"] .week-day {
+    min-height: 56px;
+  }
+
+  body[data-view="dashboard"] .week-day span {
+    font-size: 12px;
+  }
+
+  body[data-view="dashboard"] .week-day strong {
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+  }
+
+  body[data-view="dashboard"] .dashboard-grid {
+    gap: 24px;
+  }
+
+  body[data-view="dashboard"] .macro-bars {
+    gap: 8px;
+  }
+
+  body[data-view="dashboard"] .macro-card {
+    min-height: 96px;
+    padding: 12px 8px;
+    border-radius: 16px;
+  }
+
+  body[data-view="dashboard"] .macro-card header span,
+  body[data-view="dashboard"] .macro-card header strong {
+    font-size: 15px;
+  }
+
+  body[data-view="dashboard"] .today-list .panel-heading {
+    margin-bottom: 16px;
+  }
+
+  body[data-view="dashboard"] .today-list .panel-heading h3 {
+    font-size: 24px;
+  }
+
+  .list-item {
+    padding: 16px;
+    border-radius: 24px;
+  }
+
+  body[data-view="weight"] #weight.view.active {
+    gap: 32px;
+  }
+
+  .progress-section {
+    gap: 24px;
+  }
+
+  .section-heading {
+    margin-top: 32px;
+  }
+
+  .section-heading h2 {
+    font-size: 26px;
+  }
+
+  body[data-view="weight"] .form-layout {
+    gap: 24px;
+  }
+
+  body[data-view="weight"] .progress-hero,
+  body[data-view="weight"] .panel {
+    padding: 16px;
+    border-radius: 24px;
+  }
+
+  body[data-view="weight"] .progress-stats {
+    gap: 16px;
+  }
+
+  body[data-view="weight"] .progress-stats .metric-card {
+    min-height: 96px;
+    padding: 16px;
+  }
+
+  body[data-view="weight"] .progress-stats .metric-card strong {
+    font-size: 28px;
+  }
+
+  .bottom-nav {
+    right: max(16px, env(safe-area-inset-right));
+    left: max(16px, env(safe-area-inset-left));
+    bottom: calc(12px + env(safe-area-inset-bottom));
+    min-height: 72px;
+    padding: 8px;
+    border-radius: 32px;
+  }
+
+  .bottom-nav-item {
+    gap: 4px;
+  }
+
+  .bottom-nav-item span {
+    font-size: 24px;
+  }
+
+  .bottom-nav-item small {
+    font-size: 16px;
+  }
+}
