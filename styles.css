@@ -1544,3 +1544,216 @@ body[data-view="settings"] .settings-panel .panel-heading h3 {
     content: "";
   }
 }
+
+/* iPhone 15 Pro fit pass: keep the Cal-style design inside 393px cleanly */
+@media (max-width: 430px) {
+  html,
+  body {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  .content {
+    width: 100%;
+    max-width: 393px;
+    padding: calc(24px + env(safe-area-inset-top)) 19px calc(124px + env(safe-area-inset-bottom));
+  }
+
+  .fitness-hero {
+    grid-template-columns: 72px minmax(0, 1fr);
+    margin-bottom: 14px;
+  }
+
+  .topbar h2 {
+    font-size: 34px;
+  }
+
+  .food-emoji {
+    font-size: 25px;
+  }
+
+  .hero-greeting {
+    font-size: 18px;
+    white-space: normal;
+  }
+
+  .hero-icon {
+    width: 58px;
+    height: 34px;
+    font-size: 18px;
+  }
+
+  .week-strip {
+    display: grid;
+    grid-auto-flow: initial;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 5px;
+    margin: 0 0 22px;
+    padding-bottom: 18px;
+    overflow: visible;
+  }
+
+  .week-day {
+    min-width: 0;
+    min-height: 66px;
+  }
+
+  .week-day span {
+    font-size: 13px;
+    line-height: 1.15;
+  }
+
+  .week-day strong {
+    width: 36px;
+    height: 46px;
+    border-width: 3px;
+    border-radius: 16px;
+    font-size: 17px;
+  }
+
+  .calories-card {
+    min-height: 112px;
+    padding: 20px 18px;
+    border-radius: 22px;
+  }
+
+  .calories-card span {
+    font-size: 23px;
+  }
+
+  .calories-card strong {
+    font-size: 32px;
+  }
+
+  .calories-card small {
+    font-size: 20px;
+  }
+
+  .calorie-track {
+    margin: 18px 0 14px;
+  }
+
+  .macro-bars {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 7px;
+  }
+
+  .macro-card {
+    min-width: 0;
+    min-height: 112px;
+    padding: 16px 10px 14px;
+    border-radius: 18px;
+  }
+
+  .macro-card header {
+    gap: 12px;
+  }
+
+  .macro-card header span {
+    font-size: 21px;
+    line-height: 1.15;
+  }
+
+  .macro-card header strong {
+    font-size: 21px;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+  }
+
+  .macro-card .bar-track {
+    height: 7px;
+    margin-top: 10px;
+  }
+
+  .today-list {
+    min-height: 300px;
+  }
+
+  .today-list .panel-heading {
+    margin: 6px 0 18px;
+  }
+
+  .today-list .panel-heading h3 {
+    font-size: 28px;
+    line-height: 1.15;
+  }
+
+  .show-all-link {
+    font-size: 18px;
+  }
+
+  .empty-state {
+    min-height: 270px;
+    padding: 18px 10px;
+    font-size: 24px;
+  }
+
+  .empty-state::before {
+    width: 82px;
+    height: 82px;
+    border-radius: 24px;
+    font-size: 42px;
+  }
+
+  .list-item {
+    padding: 16px 14px;
+    border-radius: 24px;
+  }
+
+  .list-item h4 {
+    font-size: 20px;
+    line-height: 1.35;
+  }
+
+  .meal-chip-row {
+    justify-content: flex-start;
+  }
+
+  .fab-add {
+    left: max(22px, env(safe-area-inset-left));
+    bottom: calc(114px + env(safe-area-inset-bottom));
+    width: 62px;
+    height: 62px;
+    font-size: 40px;
+  }
+
+  .bottom-nav {
+    right: max(17px, env(safe-area-inset-right));
+    left: max(17px, env(safe-area-inset-left));
+    min-height: 74px;
+    padding: 9px;
+    border-radius: 31px;
+  }
+
+  .bottom-nav-item {
+    gap: 6px;
+  }
+
+  .bottom-nav-item span {
+    font-size: 24px;
+  }
+
+  .bottom-nav-item small {
+    font-size: 16px;
+  }
+
+  body:not([data-view="dashboard"]) .fitness-hero {
+    padding-top: 30px;
+    margin-bottom: 26px;
+  }
+
+  body:not([data-view="dashboard"]) .topbar h2 {
+    font-size: 38px;
+  }
+
+  .progress-hero,
+  .panel,
+  .metric-card {
+    border-radius: 24px;
+  }
+
+  .weight-overview {
+    grid-template-columns: 1fr;
+  }
+}
