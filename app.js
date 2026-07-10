@@ -11,6 +11,7 @@ const defaultState = {
     heightCm: 175,
     age: 25,
     sex: "male",
+    userName: "HolySeraph",
     activityLevel: 1.375
   },
   meals: [],
@@ -40,31 +41,41 @@ const els = {
   navBackdrop: document.querySelector("#navBackdrop"),
   mobileViewTitle: document.querySelector("#mobileViewTitle"),
   greetingLabel: document.querySelector("#greetingLabel"),
+  appTitle: document.querySelector("#appTitle"),
+  userNameLabel: document.querySelector("#userNameLabel"),
+  editNameBtn: document.querySelector("#editNameBtn"),
   weekStrip: document.querySelector("#weekStrip"),
   bottomNavItems: document.querySelectorAll(".bottom-nav-item"),
   fabAddMeal: document.querySelector("#fabAddMeal"),
+  exportData: document.querySelector("#exportData"),
+  importData: document.querySelector("#importData"),
   themeColor: document.querySelector('meta[name="theme-color"]'),
   appleStatusBar: document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]')
 };
 
 const viewNames = {
-  dashboard: "لوحة التحكم",
+  dashboard: "الرئيسية",
   daily: "تسجيل اليوم",
   foods: "مكتبة الأطعمة",
-  weight: "الوزن والقياسات",
-  reports: "التقارير",
-  settings: "الأهداف"
+  weight: "المتابعة اليومية",
+  reports: "التقدم",
+  settings: "الإعدادات"
 };
 
 init();
 
 function init() {
   applyTheme("dark");
+  document.body.dataset.view = "dashboard";
   document.querySelector("#mealDate").value = today;
   document.querySelector("#weightDate").value = today;
   document.querySelector("#measurementDate").value = today;
+  document.querySelectorAll('input[type="date"]').forEach((input) => {
+    input.lang = "en-CA";
+  });
   els.todayLabel.textContent = formatDateLong(today);
   els.greetingLabel.textContent = greetingText();
+  els.userNameLabel.textContent = state.settings.userName || defaultState.settings.userName;
   renderWeekStrip();
   fillSettingsForm();
   bindEvents();
@@ -83,6 +94,13 @@ function bindEvents() {
   });
 
   els.fabAddMeal.addEventListener("click", () => switchView("daily"));
+  document.querySelector(".show-all-link")?.addEventListener("click", (event) => {
+    event.preventDefault();
+    switchView("daily");
+  });
+  els.editNameBtn.addEventListener("click", editUserName);
+  els.exportData.addEventListener("click", exportAppData);
+  els.importData.addEventListener("change", importAppData);
 
   els.menuToggle.addEventListener("click", openMenu);
   els.drawerClose.addEventListener("click", closeMenu);
@@ -172,6 +190,7 @@ function bindEvents() {
       heightCm: readNumber("#heightCm"),
       age: readNumber("#age"),
       sex: document.querySelector("#sex").value,
+      userName: state.settings.userName || defaultState.settings.userName,
       activityLevel: readNumber("#activityLevel")
     };
     saveAndRender("تم تحديث الأهداف");
@@ -182,21 +201,25 @@ function bindEvents() {
     localStorage.removeItem(STORAGE_KEY);
     Object.assign(state, structuredClone(defaultState));
     fillSettingsForm();
+    els.userNameLabel.textContent = state.settings.userName;
     saveAndRender("تم حذف البيانات");
   });
 }
 
 function switchView(viewId) {
+  document.body.dataset.view = viewId;
   els.navItems.forEach((item) => item.classList.toggle("active", item.dataset.view === viewId));
   els.bottomNavItems.forEach((item) => item.classList.toggle("active", item.dataset.view === viewId));
   els.views.forEach((view) => view.classList.toggle("active", view.id === viewId));
   els.viewTitle.textContent = viewNames[viewId];
   els.mobileViewTitle.textContent = viewNames[viewId];
+  els.appTitle.textContent = viewId === "dashboard" ? "كالي" : viewNames[viewId];
   closeMenu();
   requestAnimationFrame(renderCharts);
 }
 
 function render() {
+  els.userNameLabel.textContent = state.settings.userName || defaultState.settings.userName;
   renderDashboard();
   renderFoods();
   renderWeightHistory();
@@ -211,7 +234,7 @@ function renderDashboard() {
   const proteinPercent = percent(todayTotals.protein, state.settings.targetProtein);
 
   setText("#todayCalories", Math.round(todayTotals.calories));
-  setText("#todayCaloriesHint", `من ${state.settings.targetCalories} سعرة`);
+  setText("#todayCaloriesHint", ` / ${state.settings.targetCalories.toLocaleString("en-US")} kcal`);
   setText("#remainingCalories", Math.round(remaining));
   setText("#proteinProgress", `${proteinPercent}%`);
   setText("#proteinHint", `${todayTotals.protein.toFixed(1)} من ${state.settings.targetProtein} جم`);
@@ -229,9 +252,9 @@ function renderDashboard() {
 
 function renderMacroBars(totals) {
   const macros = [
-    ["البروتين", totals.protein, state.settings.targetProtein, "var(--green)", "protein"],
-    ["الكارب", totals.carbs, state.settings.targetCarbs, "var(--blue)", "carbs"],
-    ["الدهون", totals.fat, state.settings.targetFat, "var(--gold)", "fat"]
+    ["البروتين 🍖", totals.protein, state.settings.targetProtein, "var(--red)", "protein"],
+    ["الدهون 🥑", totals.fat, state.settings.targetFat, "var(--green)", "fat"],
+    ["الكارب 🌽", totals.carbs, state.settings.targetCarbs, "var(--blue)", "carbs"]
   ];
   document.querySelector("#macroBars").innerHTML = macros.map(([label, value, target, color, type]) => `
     <div class="macro-row macro-card ${type}">
@@ -595,6 +618,12 @@ function mealTemplate(meal) {
       <div>
         <h4>${escapeHtml(meal.name)}</h4>
         <p>${meal.calories} سعرة | بروتين ${meal.protein} جم | كارب ${meal.carbs} جم | دهون ${meal.fat} جم</p>
+        <div class="meal-chip-row">
+          <span>🔥 ${meal.calories}</span>
+          <span>🍖 ${meal.protein}g</span>
+          <span>🌽 ${meal.carbs}g</span>
+          <span>🥑 ${meal.fat}g</span>
+        </div>
       </div>
       <button class="small-btn delete" data-delete-meal="${meal.id}" type="button">حذف</button>
     </div>
@@ -671,6 +700,74 @@ function fillSettingsForm() {
   });
 }
 
+function editUserName() {
+  const currentName = state.settings.userName || defaultState.settings.userName;
+  const nextName = prompt("اكتب الاسم الذي يظهر في الواجهة", currentName);
+  if (nextName === null) return;
+  const cleanName = nextName.trim();
+  if (!cleanName) return showToast("اكتب اسمًا صالحًا");
+  state.settings.userName = cleanName;
+  saveAndRender("تم تحديث الاسم");
+}
+
+function exportAppData() {
+  const payload = {
+    app: "calorie-tracker",
+    version: 2,
+    exportedAt: new Date().toISOString(),
+    state
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `calorie-tracker-backup-${today}.json`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+  showToast("تم إنشاء ملف البيانات");
+}
+
+function importAppData(event) {
+  const file = event.target.files?.[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const parsed = JSON.parse(String(reader.result || "{}"));
+      const importedState = parsed.state || parsed;
+      const nextState = normalizeImportedState(importedState);
+      Object.assign(state, nextState);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      fillSettingsForm();
+      render();
+      showToast("تم استيراد البيانات");
+    } catch {
+      showToast("تعذر قراءة ملف البيانات");
+    } finally {
+      event.target.value = "";
+    }
+  };
+  reader.readAsText(file);
+}
+
+function normalizeImportedState(importedState) {
+  return {
+    ...structuredClone(defaultState),
+    ...importedState,
+    settings: {
+      ...structuredClone(defaultState.settings),
+      ...(importedState.settings || {})
+    },
+    meals: Array.isArray(importedState.meals) ? importedState.meals : [],
+    foods: Array.isArray(importedState.foods) ? importedState.foods : [],
+    weights: Array.isArray(importedState.weights) ? importedState.weights : [],
+    measurements: Array.isArray(importedState.measurements) ? importedState.measurements : []
+  };
+}
+
 function readNumber(selector) {
   return Number(document.querySelector(selector).value) || 0;
 }
@@ -711,15 +808,15 @@ function toDateKey(date) {
 }
 
 function formatDateLong(dateKey) {
-  return new Intl.DateTimeFormat("ar-SA", { dateStyle: "full" }).format(new Date(`${dateKey}T00:00:00`));
+  return new Intl.DateTimeFormat("ar-SA-u-ca-gregory", { dateStyle: "full" }).format(new Date(`${dateKey}T00:00:00`));
 }
 
 function formatShortDate(dateKey) {
-  return new Intl.DateTimeFormat("ar-SA", { month: "short", day: "numeric" }).format(new Date(`${dateKey}T00:00:00`));
+  return new Intl.DateTimeFormat("ar-SA-u-ca-gregory", { month: "short", day: "numeric" }).format(new Date(`${dateKey}T00:00:00`));
 }
 
 function formatWeekday(dateKey) {
-  return new Intl.DateTimeFormat("ar-SA", { weekday: "short" }).format(new Date(`${dateKey}T00:00:00`));
+  return new Intl.DateTimeFormat("ar-SA-u-ca-gregory", { weekday: "short" }).format(new Date(`${dateKey}T00:00:00`));
 }
 
 function escapeHtml(value) {
@@ -751,7 +848,7 @@ function renderWeekStrip() {
   if (!els.weekStrip) return;
   const days = lastNDays(7);
   els.weekStrip.innerHTML = days.map((date) => {
-    const dayNumber = new Intl.DateTimeFormat("ar-SA", { day: "numeric" }).format(new Date(`${date}T00:00:00`));
+    const dayNumber = new Intl.DateTimeFormat("ar-SA-u-ca-gregory", { day: "numeric" }).format(new Date(`${date}T00:00:00`));
     return `
       <div class="week-day ${date === today ? "active" : ""}">
         <span>${formatWeekday(date)}</span>
