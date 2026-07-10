@@ -1557,7 +1557,7 @@ body[data-view="settings"] .settings-panel .panel-heading h3 {
   .content {
     width: 100%;
     max-width: 393px;
-    padding: calc(24px + env(safe-area-inset-top)) 19px calc(124px + env(safe-area-inset-bottom));
+    padding: calc(18px + env(safe-area-inset-top)) 20px calc(118px + env(safe-area-inset-bottom));
   }
 
   .fitness-hero {
@@ -1589,8 +1589,8 @@ body[data-view="settings"] .settings-panel .panel-heading h3 {
     grid-auto-flow: initial;
     grid-template-columns: repeat(7, minmax(0, 1fr));
     gap: 5px;
-    margin: 0 0 22px;
-    padding-bottom: 18px;
+    margin: 0 0 16px;
+    padding-bottom: 14px;
     overflow: visible;
   }
 
@@ -1613,9 +1613,7 @@ body[data-view="settings"] .settings-panel .panel-heading h3 {
   }
 
   .calories-card {
-    min-height: 112px;
-    padding: 20px 18px;
-    border-radius: 22px;
+    display: none;
   }
 
   .calories-card span {
@@ -1641,24 +1639,27 @@ body[data-view="settings"] .settings-panel .panel-heading h3 {
 
   .macro-card {
     min-width: 0;
-    min-height: 112px;
-    padding: 16px 10px 14px;
+    min-height: 118px;
+    padding: 14px 9px 13px;
     border-radius: 18px;
   }
 
   .macro-card header {
-    gap: 12px;
+    gap: 10px;
   }
 
   .macro-card header span {
-    font-size: 21px;
+    font-size: 20px;
     line-height: 1.15;
   }
 
   .macro-card header strong {
-    font-size: 21px;
-    line-height: 1.25;
-    overflow-wrap: anywhere;
+    direction: ltr;
+    unicode-bidi: isolate;
+    white-space: nowrap;
+    font-size: 19px;
+    line-height: 1.15;
+    overflow-wrap: normal;
   }
 
   .macro-card .bar-track {
@@ -1667,7 +1668,7 @@ body[data-view="settings"] .settings-panel .panel-heading h3 {
   }
 
   .today-list {
-    min-height: 300px;
+    min-height: 250px;
   }
 
   .today-list .panel-heading {
@@ -1684,9 +1685,9 @@ body[data-view="settings"] .settings-panel .panel-heading h3 {
   }
 
   .empty-state {
-    min-height: 270px;
-    padding: 18px 10px;
-    font-size: 24px;
+    min-height: 230px;
+    padding: 14px 10px;
+    font-size: 22px;
   }
 
   .empty-state::before {
