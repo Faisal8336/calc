@@ -39,6 +39,10 @@ const els = {
   drawerClose: document.querySelector("#drawerClose"),
   navBackdrop: document.querySelector("#navBackdrop"),
   mobileViewTitle: document.querySelector("#mobileViewTitle"),
+  greetingLabel: document.querySelector("#greetingLabel"),
+  weekStrip: document.querySelector("#weekStrip"),
+  bottomNavItems: document.querySelectorAll(".bottom-nav-item"),
+  fabAddMeal: document.querySelector("#fabAddMeal"),
   themeColor: document.querySelector('meta[name="theme-color"]'),
   appleStatusBar: document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]')
 };
@@ -55,11 +59,13 @@ const viewNames = {
 init();
 
 function init() {
-  applyTheme(localStorage.getItem(THEME_KEY) || "light");
+  applyTheme("dark");
   document.querySelector("#mealDate").value = today;
   document.querySelector("#weightDate").value = today;
   document.querySelector("#measurementDate").value = today;
   els.todayLabel.textContent = formatDateLong(today);
+  els.greetingLabel.textContent = greetingText();
+  renderWeekStrip();
   fillSettingsForm();
   bindEvents();
   registerServiceWorker();
@@ -71,6 +77,12 @@ function bindEvents() {
   els.navItems.forEach((button) => {
     button.addEventListener("click", () => switchView(button.dataset.view));
   });
+
+  els.bottomNavItems.forEach((button) => {
+    button.addEventListener("click", () => switchView(button.dataset.view));
+  });
+
+  els.fabAddMeal.addEventListener("click", () => switchView("daily"));
 
   els.menuToggle.addEventListener("click", openMenu);
   els.drawerClose.addEventListener("click", closeMenu);
@@ -176,6 +188,7 @@ function bindEvents() {
 
 function switchView(viewId) {
   els.navItems.forEach((item) => item.classList.toggle("active", item.dataset.view === viewId));
+  els.bottomNavItems.forEach((item) => item.classList.toggle("active", item.dataset.view === viewId));
   els.views.forEach((view) => view.classList.toggle("active", view.id === viewId));
   els.viewTitle.textContent = viewNames[viewId];
   els.mobileViewTitle.textContent = viewNames[viewId];
@@ -188,6 +201,7 @@ function render() {
   renderFoods();
   renderWeightHistory();
   renderReports();
+  renderProgressOverview();
   renderCharts();
 }
 
@@ -202,6 +216,7 @@ function renderDashboard() {
   setText("#proteinProgress", `${proteinPercent}%`);
   setText("#proteinHint", `${todayTotals.protein.toFixed(1)} من ${state.settings.targetProtein} جم`);
   setText("#streakCount", calculateStreak());
+  document.querySelector(".calories-card")?.style.setProperty("--progress", `${Math.min(percent(todayTotals.calories, state.settings.targetCalories), 100)}%`);
 
   renderMacroBars(todayTotals);
   renderTodayMeals();
@@ -214,14 +229,14 @@ function renderDashboard() {
 
 function renderMacroBars(totals) {
   const macros = [
-    ["البروتين", totals.protein, state.settings.targetProtein, "var(--green)"],
-    ["الكارب", totals.carbs, state.settings.targetCarbs, "var(--blue)"],
-    ["الدهون", totals.fat, state.settings.targetFat, "var(--gold)"]
+    ["البروتين", totals.protein, state.settings.targetProtein, "var(--green)", "protein"],
+    ["الكارب", totals.carbs, state.settings.targetCarbs, "var(--blue)", "carbs"],
+    ["الدهون", totals.fat, state.settings.targetFat, "var(--gold)", "fat"]
   ];
-  document.querySelector("#macroBars").innerHTML = macros.map(([label, value, target, color]) => `
-    <div class="macro-row">
+  document.querySelector("#macroBars").innerHTML = macros.map(([label, value, target, color, type]) => `
+    <div class="macro-row macro-card ${type}">
       <header><span>${label}</span><strong>${value.toFixed(1)} / ${target} جم</strong></header>
-      <div class="bar-track"><div class="bar-fill" style="width:${Math.min(percent(value, target), 130)}%;background:${color}"></div></div>
+      <div class="bar-track"><div class="bar-fill" style="width:${Math.min(percent(value, target), 100)}%;background:${color}"></div></div>
     </div>
   `).join("");
 }
@@ -273,6 +288,33 @@ function renderWeightHistory() {
   });
 }
 
+function renderProgressOverview() {
+  const weights = [...state.weights].sort((a, b) => a.date.localeCompare(b.date));
+  const last = weights[weights.length - 1];
+  const previous = weights.length > 1 ? weights[weights.length - 2] : null;
+  const dates = lastNDays(7);
+  const totals = dates.map(totalsForDate);
+  const loggedDays = totals.filter((day) => day.calories > 0);
+  const avgCalories = loggedDays.length ? average(loggedDays.map((day) => day.calories)) : 0;
+  const adherenceDays = totals.filter((day) => day.calories > 0 && day.calories <= state.settings.targetCalories).length;
+
+  setText("#currentWeightValue", last ? `${last.value} كجم` : "-");
+  setText("#targetWeightValue", `${state.settings.targetWeight} كجم`);
+  setText("#weightDifferenceValue", last ? `${Math.abs(last.value - state.settings.targetWeight).toFixed(1)} كجم` : "-");
+  setText("#progressLastEntry", last ? `آخر تسجيل ${formatDateLong(last.date)}` : "لا يوجد تسجيل بعد");
+  setText("#progressAvgCalories", Math.round(avgCalories));
+  setText("#progressAdherence", `${Math.round((adherenceDays / 7) * 100)}%`);
+
+  if (!last || !previous) {
+    setText("#weeklyWeightRate", "0");
+    return;
+  }
+
+  const dayGap = Math.max(daysBetween(previous.date, last.date), 1);
+  const weeklyRate = ((last.value - previous.value) / dayGap) * 7;
+  setText("#weeklyWeightRate", weeklyRate.toFixed(1));
+}
+
 function renderCharts() {
   renderWeeklyCaloriesChart();
   renderWeightChart();
@@ -290,7 +332,7 @@ function renderWeeklyCaloriesChart() {
       datasets: [{
         label: "السعرات",
         data: dates.map((date) => totalsForDate(date).calories),
-        backgroundColor: colors.green,
+        backgroundColor: colors.orange,
         borderRadius: 8,
         maxBarThickness: isMobile() ? 28 : 44
       }]
@@ -348,7 +390,7 @@ function renderReportChart() {
     data: {
       labels: dates.map(formatShortDate),
       datasets: [
-        { label: "السعرات", data: dates.map((date) => totalsForDate(date).calories), borderColor: colors.green, yAxisID: "y" },
+        { label: "السعرات", data: dates.map((date) => totalsForDate(date).calories), borderColor: colors.orange, yAxisID: "y" },
         { label: "البروتين", data: dates.map((date) => totalsForDate(date).protein), borderColor: colors.blue, yAxisID: "y1" }
       ]
     },
@@ -441,23 +483,15 @@ function chartScale() {
 }
 
 function chartColors() {
-  const dark = document.body.classList.contains("dark");
-  return dark ? {
-    green: "#63e09b",
-    blue: "#79c9ff",
-    gold: "#f2bf62",
-    red: "#ff8f9b",
-    blueFill: "rgba(121, 201, 255, 0.17)",
-    grid: "rgba(180, 220, 205, 0.13)",
-    muted: "#b8c9c0"
-  } : {
-    green: "#2f7d5b",
-    blue: "#376f9e",
-    gold: "#ba7a27",
-    red: "#b94747",
-    blueFill: "rgba(55,111,158,0.12)",
-    grid: "#eef1ec",
-    muted: "#68736d"
+  return {
+    green: "#36f1a7",
+    blue: "#38c7ff",
+    orange: "#ff9f43",
+    gold: "#ff9f43",
+    red: "#ff5d73",
+    blueFill: "rgba(56, 199, 255, 0.16)",
+    grid: "rgba(157, 187, 222, 0.13)",
+    muted: "#93a7c5"
   };
 }
 
@@ -706,11 +740,32 @@ function showToast(message) {
 }
 
 function applyTheme(theme) {
-  document.body.classList.toggle("dark", theme === "dark");
-  els.themeToggle.textContent = theme === "dark" ? "الوضع النهاري" : "الوضع الليلي";
-  els.themeColor.content = theme === "dark" ? "#08110f" : "#f7f5ef";
-  els.appleStatusBar.content = theme === "dark" ? "black-translucent" : "default";
+  document.body.classList.add("dark");
+  els.themeToggle.textContent = "الوضع الليلي";
+  els.themeColor.content = "#071225";
+  els.appleStatusBar.content = "black-translucent";
   requestAnimationFrame(renderCharts);
+}
+
+function renderWeekStrip() {
+  if (!els.weekStrip) return;
+  const days = lastNDays(7);
+  els.weekStrip.innerHTML = days.map((date) => {
+    const dayNumber = new Intl.DateTimeFormat("ar-SA", { day: "numeric" }).format(new Date(`${date}T00:00:00`));
+    return `
+      <div class="week-day ${date === today ? "active" : ""}">
+        <span>${formatWeekday(date)}</span>
+        <strong>${dayNumber}</strong>
+      </div>
+    `;
+  }).join("");
+}
+
+function greetingText() {
+  const hour = new Date().getHours();
+  if (hour < 12) return "صباح النشاط";
+  if (hour < 18) return "نهارك صحي";
+  return "مساء الإنجاز";
 }
 
 function registerServiceWorker() {
