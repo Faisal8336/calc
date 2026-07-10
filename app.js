@@ -11,12 +11,10 @@ const defaultState = {
     heightCm: 175,
     age: 25,
     sex: "male",
-    userName: "HolySeraph",
     activityLevel: 1.375
   },
   meals: [],
   foods: [],
-  waters: [],
   weights: [],
   measurements: []
 };
@@ -41,43 +39,27 @@ const els = {
   drawerClose: document.querySelector("#drawerClose"),
   navBackdrop: document.querySelector("#navBackdrop"),
   mobileViewTitle: document.querySelector("#mobileViewTitle"),
-  greetingLabel: document.querySelector("#greetingLabel"),
-  appTitle: document.querySelector("#appTitle"),
-  userNameLabel: document.querySelector("#userNameLabel"),
-  editNameBtn: document.querySelector("#editNameBtn"),
-  weekStrip: document.querySelector("#weekStrip"),
-  bottomNavItems: document.querySelectorAll(".bottom-nav-item"),
-  fabAddMeal: document.querySelector("#fabAddMeal"),
-  exportData: document.querySelector("#exportData"),
-  importData: document.querySelector("#importData"),
   themeColor: document.querySelector('meta[name="theme-color"]'),
   appleStatusBar: document.querySelector('meta[name="apple-mobile-web-app-status-bar-style"]')
 };
 
 const viewNames = {
-  dashboard: "الرئيسية",
+  dashboard: "لوحة التحكم",
   daily: "تسجيل اليوم",
   foods: "مكتبة الأطعمة",
-  weight: "المتابعة اليومية",
-  reports: "التقدم",
-  settings: "الإعدادات"
+  weight: "الوزن والقياسات",
+  reports: "التقارير",
+  settings: "الأهداف"
 };
 
 init();
 
 function init() {
-  applyTheme("dark");
-  document.body.dataset.view = "dashboard";
+  applyTheme(localStorage.getItem(THEME_KEY) || "light");
   document.querySelector("#mealDate").value = today;
   document.querySelector("#weightDate").value = today;
   document.querySelector("#measurementDate").value = today;
-  document.querySelectorAll('input[type="date"]').forEach((input) => {
-    input.lang = "en-CA";
-  });
   els.todayLabel.textContent = formatDateLong(today);
-  els.greetingLabel.textContent = greetingText();
-  els.userNameLabel.textContent = state.settings.userName || defaultState.settings.userName;
-  renderWeekStrip();
   fillSettingsForm();
   bindEvents();
   registerServiceWorker();
@@ -89,26 +71,6 @@ function bindEvents() {
   els.navItems.forEach((button) => {
     button.addEventListener("click", () => switchView(button.dataset.view));
   });
-
-  els.bottomNavItems.forEach((button) => {
-    button.addEventListener("click", () => switchView(button.dataset.view));
-  });
-
-  els.fabAddMeal.addEventListener("click", () => switchView("daily"));
-  document.querySelector("#weightLogToggle")?.addEventListener("click", () => {
-    const panel = document.querySelector("#weightLogPanel");
-    if (!panel) return;
-    panel.hidden = !panel.hidden;
-    if (!panel.hidden) document.querySelector("#weightValue")?.focus();
-  });
-  document.querySelector(".show-all-link")?.addEventListener("click", (event) => {
-    event.preventDefault();
-    switchView("daily");
-  });
-  document.querySelector("#waterAdd")?.addEventListener("click", addWaterEntry);
-  els.editNameBtn.addEventListener("click", editUserName);
-  els.exportData.addEventListener("click", exportAppData);
-  els.importData.addEventListener("change", importAppData);
 
   els.menuToggle.addEventListener("click", openMenu);
   els.drawerClose.addEventListener("click", closeMenu);
@@ -141,10 +103,9 @@ function bindEvents() {
     if (document.querySelector("#saveFood").checked) {
       state.foods.push({ ...meal, id: createId() });
     }
+    saveAndRender("تمت إضافة الوجبة");
     els.mealForm.reset();
     document.querySelector("#mealDate").value = today;
-    saveAndRender("تمت إضافة الوجبة");
-    switchView("dashboard");
   });
 
   els.foodForm.addEventListener("submit", (event) => {
@@ -199,7 +160,6 @@ function bindEvents() {
       heightCm: readNumber("#heightCm"),
       age: readNumber("#age"),
       sex: document.querySelector("#sex").value,
-      userName: state.settings.userName || defaultState.settings.userName,
       activityLevel: readNumber("#activityLevel")
     };
     saveAndRender("تم تحديث الأهداف");
@@ -210,31 +170,24 @@ function bindEvents() {
     localStorage.removeItem(STORAGE_KEY);
     Object.assign(state, structuredClone(defaultState));
     fillSettingsForm();
-    els.userNameLabel.textContent = state.settings.userName;
     saveAndRender("تم حذف البيانات");
   });
 }
 
 function switchView(viewId) {
-  document.body.dataset.view = viewId;
   els.navItems.forEach((item) => item.classList.toggle("active", item.dataset.view === viewId));
-  els.bottomNavItems.forEach((item) => item.classList.toggle("active", item.dataset.view === viewId));
   els.views.forEach((view) => view.classList.toggle("active", view.id === viewId));
   els.viewTitle.textContent = viewNames[viewId];
   els.mobileViewTitle.textContent = viewNames[viewId];
-  els.appTitle.textContent = viewId === "dashboard" ? "كالي" : viewNames[viewId];
   closeMenu();
-  window.scrollTo({ top: 0, left: 0, behavior: "auto" });
   requestAnimationFrame(renderCharts);
 }
 
 function render() {
-  els.userNameLabel.textContent = state.settings.userName || defaultState.settings.userName;
   renderDashboard();
   renderFoods();
   renderWeightHistory();
   renderReports();
-  renderProgressOverview();
   renderCharts();
 }
 
@@ -244,12 +197,11 @@ function renderDashboard() {
   const proteinPercent = percent(todayTotals.protein, state.settings.targetProtein);
 
   setText("#todayCalories", Math.round(todayTotals.calories));
-  setText("#todayCaloriesHint", ` / ${state.settings.targetCalories.toLocaleString("en-US")} kcal`);
+  setText("#todayCaloriesHint", `من ${state.settings.targetCalories} سعرة`);
   setText("#remainingCalories", Math.round(remaining));
   setText("#proteinProgress", `${proteinPercent}%`);
   setText("#proteinHint", `${todayTotals.protein.toFixed(1)} من ${state.settings.targetProtein} جم`);
   setText("#streakCount", calculateStreak());
-  document.querySelector(".calories-card")?.style.setProperty("--progress", `${Math.min(percent(todayTotals.calories, state.settings.targetCalories), 100)}%`);
 
   renderMacroBars(todayTotals);
   renderTodayMeals();
@@ -262,14 +214,14 @@ function renderDashboard() {
 
 function renderMacroBars(totals) {
   const macros = [
-    ["البروتين 🍖", totals.protein, state.settings.targetProtein, "var(--red)", "protein"],
-    ["الدهون 🥑", totals.fat, state.settings.targetFat, "var(--green)", "fat"],
-    ["الكارب 🌽", totals.carbs, state.settings.targetCarbs, "var(--blue)", "carbs"]
+    ["البروتين", totals.protein, state.settings.targetProtein, "var(--green)"],
+    ["الكارب", totals.carbs, state.settings.targetCarbs, "var(--blue)"],
+    ["الدهون", totals.fat, state.settings.targetFat, "var(--gold)"]
   ];
-  document.querySelector("#macroBars").innerHTML = macros.map(([label, value, target, color, type]) => `
-    <div class="macro-row macro-card ${type}">
-      <header><span>${label}</span><strong>${formatMacroAmount(value)} / ${target}g</strong></header>
-      <div class="bar-track"><div class="bar-fill" style="width:${Math.min(percent(value, target), 100)}%;background:${color}"></div></div>
+  document.querySelector("#macroBars").innerHTML = macros.map(([label, value, target, color]) => `
+    <div class="macro-row">
+      <header><span>${label}</span><strong>${value.toFixed(1)} / ${target} جم</strong></header>
+      <div class="bar-track"><div class="bar-fill" style="width:${Math.min(percent(value, target), 130)}%;background:${color}"></div></div>
     </div>
   `).join("");
 }
@@ -321,65 +273,9 @@ function renderWeightHistory() {
   });
 }
 
-function renderProgressOverview() {
-  const weights = [...state.weights].sort((a, b) => a.date.localeCompare(b.date));
-  const last = weights[weights.length - 1];
-  const first = weights[0];
-  const previous = weights.length > 1 ? weights[weights.length - 2] : null;
-  const dates = lastNDays(7);
-  const totals = dates.map(totalsForDate);
-  const loggedDays = totals.filter((day) => day.calories > 0);
-  const avgCalories = loggedDays.length ? average(loggedDays.map((day) => day.calories)) : 0;
-  const adherenceDays = totals.filter((day) => day.calories > 0 && day.calories <= state.settings.targetCalories).length;
-  const todayTotals = totalsForDate(today);
-  const calorieTarget = state.settings.targetCalories;
-  const caloriePercent = Math.min(percent(todayTotals.calories, calorieTarget), 100);
-  const waterMl = waterForDate(today);
-  const waterTargetMl = 2800;
-  const waterPercent = Math.min(percent(waterMl, waterTargetMl), 100);
-  const currentWeight = last?.value || first?.value || state.settings.targetWeight;
-  const startingWeight = first?.value || currentWeight;
-  const targetWeight = state.settings.targetWeight;
-  const weightDiff = last ? currentWeight - startingWeight : 0;
-  const totalWeightDistance = Math.abs(startingWeight - targetWeight);
-  const coveredWeightDistance = totalWeightDistance ? Math.abs(startingWeight - currentWeight) : 0;
-  const weightProgress = totalWeightDistance ? Math.min(Math.round((coveredWeightDistance / totalWeightDistance) * 100), 100) : (last ? 100 : 0);
-  const bmi = currentWeight && state.settings.heightCm ? currentWeight / ((state.settings.heightCm / 100) ** 2) : 0;
-  const bmiStatus = bmi < 18.5 ? "نحافة" : bmi < 25 ? "طبيعي" : bmi < 30 ? "زيادة الوزن" : "سمنة";
-
-  setText("#progressTodayCalories", Math.round(todayTotals.calories).toLocaleString("en-US"));
-  setText("#progressTodayCaloriesTarget", `/ ${formatCompactNumber(calorieTarget)} kcal`);
-  document.querySelector("#progressTodayCaloriesFill")?.style.setProperty("width", `${caloriePercent}%`);
-  setText("#waterValue", formatWaterLiters(waterMl));
-  setText("#waterPercent", `${waterPercent}%`);
-  document.querySelector("#waterRing")?.style.setProperty("--water-progress", `${waterPercent * 3.6}deg`);
-
-  setText("#currentWeightValue", last ? last.value.toFixed(1) : "-");
-  setText("#startingWeightValue", `${startingWeight.toFixed(1)}kg`);
-  setText("#targetWeightValue", `${targetWeight.toFixed(1)}kg`);
-  setText("#weightDifferenceValue", last ? `${weightDiff >= 0 ? "↑ +" : "↓ "}${Math.abs(weightDiff).toFixed(1)} kg` : "-");
-  setText("#progressLastEntry", last ? `آخر تسجيل ${formatDateLong(last.date)}` : "لا يوجد تسجيل بعد");
-  setText("#bmiValue", bmi ? bmi.toFixed(1) : "-");
-  setText("#bmiStatus", bmi ? bmiStatus : "-");
-  setText("#progressAvgCalories", Math.round(avgCalories));
-  setText("#progressAdherence", `${Math.round((adherenceDays / 7) * 100)}%`);
-  document.querySelector(".weight-progress-dots")?.style.setProperty("--weight-progress", `${weightProgress}%`);
-  document.querySelector(".weight-progress-dots")?.setAttribute("title", `التقدم للهدف ${weightProgress}%`);
-
-  if (!last || !previous) {
-    setText("#weeklyWeightRate", "0");
-    return;
-  }
-
-  const dayGap = Math.max(daysBetween(previous.date, last.date), 1);
-  const weeklyRate = ((last.value - previous.value) / dayGap) * 7;
-  setText("#weeklyWeightRate", weeklyRate.toFixed(1));
-}
-
 function renderCharts() {
   renderWeeklyCaloriesChart();
   renderWeightChart();
-  renderProgressWeightChart();
   renderMeasurementsChart();
   renderReportChart();
 }
@@ -394,7 +290,7 @@ function renderWeeklyCaloriesChart() {
       datasets: [{
         label: "السعرات",
         data: dates.map((date) => totalsForDate(date).calories),
-        backgroundColor: colors.orange,
+        backgroundColor: colors.green,
         borderRadius: 8,
         maxBarThickness: isMobile() ? 28 : 44
       }]
@@ -426,39 +322,6 @@ function renderWeightChart() {
   });
 }
 
-function renderProgressWeightChart() {
-  const weights = [...state.weights].sort((a, b) => a.date.localeCompare(b.date));
-  const colors = chartColors();
-  const fallbackWeights = weights.length ? weights : [
-    { date: addDays(today, -6), value: state.settings.targetWeight },
-    { date: today, value: state.settings.targetWeight }
-  ];
-  createChart("progressWeightChart", {
-    type: "line",
-    data: {
-      labels: fallbackWeights.map((entry) => formatShortDate(entry.date)),
-      datasets: [{
-        label: "الوزن",
-        data: fallbackWeights.map((entry) => entry.value),
-        borderColor: colors.blue,
-        backgroundColor: colors.blueFill,
-        borderWidth: 3,
-        pointRadius: 3,
-        pointHoverRadius: 5,
-        fill: true,
-        tension: 0.28
-      }]
-    },
-    options: {
-      ...baseChartOptions(),
-      plugins: {
-        ...baseChartOptions().plugins,
-        legend: { display: false }
-      }
-    }
-  });
-}
-
 function renderMeasurementsChart() {
   const items = [...state.measurements].sort((a, b) => a.date.localeCompare(b.date));
   const colors = chartColors();
@@ -485,7 +348,7 @@ function renderReportChart() {
     data: {
       labels: dates.map(formatShortDate),
       datasets: [
-        { label: "السعرات", data: dates.map((date) => totalsForDate(date).calories), borderColor: colors.orange, yAxisID: "y" },
+        { label: "السعرات", data: dates.map((date) => totalsForDate(date).calories), borderColor: colors.green, yAxisID: "y" },
         { label: "البروتين", data: dates.map((date) => totalsForDate(date).protein), borderColor: colors.blue, yAxisID: "y1" }
       ]
     },
@@ -578,15 +441,23 @@ function chartScale() {
 }
 
 function chartColors() {
-  return {
-    green: "#36f1a7",
-    blue: "#38c7ff",
-    orange: "#ff9f43",
-    gold: "#ff9f43",
-    red: "#ff5d73",
-    blueFill: "rgba(56, 199, 255, 0.16)",
-    grid: "rgba(157, 187, 222, 0.13)",
-    muted: "#93a7c5"
+  const dark = document.body.classList.contains("dark");
+  return dark ? {
+    green: "#63e09b",
+    blue: "#79c9ff",
+    gold: "#f2bf62",
+    red: "#ff8f9b",
+    blueFill: "rgba(121, 201, 255, 0.17)",
+    grid: "rgba(180, 220, 205, 0.13)",
+    muted: "#b8c9c0"
+  } : {
+    green: "#2f7d5b",
+    blue: "#376f9e",
+    gold: "#ba7a27",
+    red: "#b94747",
+    blueFill: "rgba(55,111,158,0.12)",
+    grid: "#eef1ec",
+    muted: "#68736d"
   };
 }
 
@@ -599,22 +470,6 @@ function addFoodToToday(id) {
     date: document.querySelector("#mealDate").value || today
   });
   saveAndRender("تمت إضافة الطعام لليوم");
-}
-
-function addWaterEntry() {
-  const value = prompt("أدخل كمية الماء بالمل (مثال: 250، 500، 750، 1000)", "250");
-  if (value === null) return;
-  const amount = Number(String(value).replace(/[^\d.]/g, ""));
-  if (!Number.isFinite(amount) || amount <= 0) {
-    showToast("أدخل كمية ماء صحيحة");
-    return;
-  }
-  state.waters.push({
-    id: createId(),
-    date: today,
-    amountMl: Math.round(amount)
-  });
-  saveAndRender("تمت إضافة الماء");
 }
 
 function removeItem(collection, id) {
@@ -641,12 +496,6 @@ function totalsForDate(date) {
       carbs: totals.carbs + meal.carbs,
       fat: totals.fat + meal.fat
     }), { calories: 0, protein: 0, carbs: 0, fat: 0 });
-}
-
-function waterForDate(date) {
-  return (state.waters || [])
-    .filter((entry) => entry.date === date)
-    .reduce((total, entry) => total + (Number(entry.amountMl) || 0), 0);
 }
 
 function calculateStreak() {
@@ -706,31 +555,12 @@ function formatWeeks(weeks) {
   return `${weeks} أسبوعًا`;
 }
 
-function formatMacroAmount(value) {
-  return Number(value) % 1 === 0 ? String(Math.round(value)) : value.toFixed(1);
-}
-
-function formatCompactNumber(value) {
-  if (value >= 1000) return `${(value / 1000).toFixed(value % 1000 ? 1 : 0)}k`;
-  return String(Math.round(value));
-}
-
-function formatWaterLiters(valueMl) {
-  const liters = valueMl / 1000;
-  return Number.isInteger(liters) ? String(liters) : liters.toFixed(2).replace(/0$/, "");
-}
-
 function mealTemplate(meal) {
   return `
-    <div class="list-item meal-item">
-      <div class="meal-content">
+    <div class="list-item">
+      <div>
         <h4>${escapeHtml(meal.name)}</h4>
-        <p class="meal-calories">🔥 ${meal.calories} سعرة</p>
-        <div class="meal-chip-row">
-          <span>🍗 ${meal.protein}g</span>
-          <span>🌽 ${meal.carbs}g</span>
-          <span>🥑 ${meal.fat}g</span>
-        </div>
+        <p>${meal.calories} سعرة | بروتين ${meal.protein} جم | كارب ${meal.carbs} جم | دهون ${meal.fat} جم</p>
       </div>
       <button class="small-btn delete" data-delete-meal="${meal.id}" type="button">حذف</button>
     </div>
@@ -807,82 +637,12 @@ function fillSettingsForm() {
   });
 }
 
-function editUserName() {
-  const currentName = state.settings.userName || defaultState.settings.userName;
-  const nextName = prompt("اكتب الاسم الذي يظهر في الواجهة", currentName);
-  if (nextName === null) return;
-  const cleanName = nextName.trim();
-  if (!cleanName) return showToast("اكتب اسمًا صالحًا");
-  state.settings.userName = cleanName;
-  saveAndRender("تم تحديث الاسم");
-}
-
-function exportAppData() {
-  const payload = {
-    app: "calorie-tracker",
-    version: 2,
-    exportedAt: new Date().toISOString(),
-    state
-  };
-  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = `calorie-tracker-backup-${today}.json`;
-  document.body.appendChild(link);
-  link.click();
-  link.remove();
-  URL.revokeObjectURL(url);
-  showToast("تم إنشاء ملف البيانات");
-}
-
-function importAppData(event) {
-  const file = event.target.files?.[0];
-  if (!file) return;
-
-  const reader = new FileReader();
-  reader.onload = () => {
-    try {
-      const parsed = JSON.parse(String(reader.result || "{}"));
-      const importedState = parsed.state || parsed;
-      const nextState = normalizeImportedState(importedState);
-      Object.assign(state, nextState);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-      fillSettingsForm();
-      render();
-      showToast("تم استيراد البيانات");
-    } catch {
-      showToast("تعذر قراءة ملف البيانات");
-    } finally {
-      event.target.value = "";
-    }
-  };
-  reader.readAsText(file);
-}
-
-function normalizeImportedState(importedState) {
-  return {
-    ...structuredClone(defaultState),
-    ...importedState,
-    settings: {
-      ...structuredClone(defaultState.settings),
-      ...(importedState.settings || {})
-    },
-    meals: Array.isArray(importedState.meals) ? importedState.meals : [],
-    foods: Array.isArray(importedState.foods) ? importedState.foods : [],
-    waters: Array.isArray(importedState.waters) ? importedState.waters : [],
-    weights: Array.isArray(importedState.weights) ? importedState.weights : [],
-    measurements: Array.isArray(importedState.measurements) ? importedState.measurements : []
-  };
-}
-
 function readNumber(selector) {
   return Number(document.querySelector(selector).value) || 0;
 }
 
 function setText(selector, value) {
-  const element = document.querySelector(selector);
-  if (element) element.textContent = value;
+  document.querySelector(selector).textContent = value;
 }
 
 function percent(value, target) {
@@ -917,15 +677,15 @@ function toDateKey(date) {
 }
 
 function formatDateLong(dateKey) {
-  return new Intl.DateTimeFormat("ar-SA-u-ca-gregory", { dateStyle: "full" }).format(new Date(`${dateKey}T00:00:00`));
+  return new Intl.DateTimeFormat("ar-SA", { dateStyle: "full" }).format(new Date(`${dateKey}T00:00:00`));
 }
 
 function formatShortDate(dateKey) {
-  return new Intl.DateTimeFormat("ar-SA-u-ca-gregory", { month: "short", day: "numeric" }).format(new Date(`${dateKey}T00:00:00`));
+  return new Intl.DateTimeFormat("ar-SA", { month: "short", day: "numeric" }).format(new Date(`${dateKey}T00:00:00`));
 }
 
 function formatWeekday(dateKey) {
-  return new Intl.DateTimeFormat("ar-SA-u-ca-gregory", { weekday: "short" }).format(new Date(`${dateKey}T00:00:00`));
+  return new Intl.DateTimeFormat("ar-SA", { weekday: "short" }).format(new Date(`${dateKey}T00:00:00`));
 }
 
 function escapeHtml(value) {
@@ -946,32 +706,11 @@ function showToast(message) {
 }
 
 function applyTheme(theme) {
-  document.body.classList.add("dark");
-  els.themeToggle.textContent = "الوضع الليلي";
-  els.themeColor.content = "#071225";
-  els.appleStatusBar.content = "black-translucent";
+  document.body.classList.toggle("dark", theme === "dark");
+  els.themeToggle.textContent = theme === "dark" ? "الوضع النهاري" : "الوضع الليلي";
+  els.themeColor.content = theme === "dark" ? "#08110f" : "#f7f5ef";
+  els.appleStatusBar.content = theme === "dark" ? "black-translucent" : "default";
   requestAnimationFrame(renderCharts);
-}
-
-function renderWeekStrip() {
-  if (!els.weekStrip) return;
-  const days = lastNDays(7);
-  els.weekStrip.innerHTML = days.map((date) => {
-    const dayNumber = new Intl.DateTimeFormat("ar-SA-u-ca-gregory", { day: "numeric" }).format(new Date(`${date}T00:00:00`));
-    return `
-      <div class="week-day ${date === today ? "active" : ""}">
-        <span>${formatWeekday(date)}</span>
-        <strong>${dayNumber}</strong>
-      </div>
-    `;
-  }).join("");
-}
-
-function greetingText() {
-  const hour = new Date().getHours();
-  if (hour < 12) return "صباح النشاط";
-  if (hour < 18) return "نهارك صحي";
-  return "مساء الإنجاز";
 }
 
 function registerServiceWorker() {
