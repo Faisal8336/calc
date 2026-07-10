@@ -53,11 +53,12 @@
     <main class="content">
       <header class="topbar fitness-hero">
         <div class="hero-copy">
-          <p class="eyebrow" id="greetingLabel">مساء النشاط</p>
-          <h2>أهلًا، <span id="userNameLabel">HolySeraph</span></h2>
+          <h2><span id="appTitle">سعراتي</span> <span class="food-emoji" aria-hidden="true">🥗</span></h2>
+          <p class="eyebrow hero-greeting"><span id="greetingLabel">مساء النشاط</span>، <span id="userNameLabel">HolySeraph</span> 👋</p>
+          <button class="edit-name-btn" id="editNameBtn" type="button">تعديل الاسم</button>
           <p class="hero-subtitle" id="viewTitle">لوحة التحكم</p>
         </div>
-        <div class="hero-icon" aria-hidden="true">◎</div>
+        <div class="hero-icon" aria-hidden="true">0 ⚡</div>
         <div class="date-pill" id="todayLabel"></div>
       </header>
 
@@ -66,7 +67,7 @@
 
         <div class="summary-grid">
           <article class="metric-card calories-card">
-            <span>سعرات اليوم</span>
+            <span>السعرات الحرارية 🔥</span>
             <strong id="todayCalories">0</strong>
             <small id="todayCaloriesHint">من هدفك اليومي</small>
             <div class="calorie-details">
@@ -121,6 +122,7 @@
           <section class="panel today-list">
             <div class="panel-heading">
               <h3>وجبات اليوم</h3>
+              <a class="show-all-link" href="#daily">عرض الكل</a>
               <p id="mealCount">لا توجد وجبات بعد</p>
             </div>
             <div id="todayMeals"></div>
@@ -397,6 +399,19 @@
             </div>
             <button class="primary-btn" type="submit">حفظ الأهداف</button>
           </form>
+          <div class="data-tools">
+            <div>
+              <h3>نقل البيانات</h3>
+              <p>احفظ نسخة كاملة من سجلاتك على الجوال، أو استوردها على جهاز آخر.</p>
+            </div>
+            <div class="data-actions">
+              <button class="ghost-btn" id="exportData" type="button">حفظ ملف البيانات</button>
+              <label class="import-data-btn">
+                استيراد ملف البيانات
+                <input type="file" id="importData" accept="application/json,.json">
+              </label>
+            </div>
+          </div>
           <button class="danger-btn" id="clearData" type="button">حذف كل البيانات المحلية</button>
         </section>
       </section>
