@@ -16,6 +16,7 @@ const defaultState = {
   },
   meals: [],
   foods: [],
+  waters: [],
   weights: [],
   measurements: []
 };
@@ -104,6 +105,7 @@ function bindEvents() {
     event.preventDefault();
     switchView("daily");
   });
+  document.querySelector("#waterAdd")?.addEventListener("click", addWaterEntry);
   els.editNameBtn.addEventListener("click", editUserName);
   els.exportData.addEventListener("click", exportAppData);
   els.importData.addEventListener("change", importAppData);
@@ -139,9 +141,10 @@ function bindEvents() {
     if (document.querySelector("#saveFood").checked) {
       state.foods.push({ ...meal, id: createId() });
     }
-    saveAndRender("تمت إضافة الوجبة");
     els.mealForm.reset();
     document.querySelector("#mealDate").value = today;
+    saveAndRender("تمت إضافة الوجبة");
+    switchView("dashboard");
   });
 
   els.foodForm.addEventListener("submit", (event) => {
@@ -331,35 +334,37 @@ function renderProgressOverview() {
   const todayTotals = totalsForDate(today);
   const calorieTarget = state.settings.targetCalories;
   const caloriePercent = Math.min(percent(todayTotals.calories, calorieTarget), 100);
-  const steps = 0;
-  const stepsTarget = 10000;
-  const waterLiters = 0;
-  const waterTarget = 2.8;
-  const waterPercent = Math.min(percent(waterLiters, waterTarget), 100);
+  const waterMl = waterForDate(today);
+  const waterTargetMl = 2800;
+  const waterPercent = Math.min(percent(waterMl, waterTargetMl), 100);
   const currentWeight = last?.value || first?.value || state.settings.targetWeight;
   const startingWeight = first?.value || currentWeight;
-  const weightDiff = last ? last.value - state.settings.targetWeight : 0;
+  const targetWeight = state.settings.targetWeight;
+  const weightDiff = last ? currentWeight - startingWeight : 0;
+  const totalWeightDistance = Math.abs(startingWeight - targetWeight);
+  const coveredWeightDistance = totalWeightDistance ? Math.abs(startingWeight - currentWeight) : 0;
+  const weightProgress = totalWeightDistance ? Math.min(Math.round((coveredWeightDistance / totalWeightDistance) * 100), 100) : (last ? 100 : 0);
   const bmi = currentWeight && state.settings.heightCm ? currentWeight / ((state.settings.heightCm / 100) ** 2) : 0;
   const bmiStatus = bmi < 18.5 ? "نحافة" : bmi < 25 ? "طبيعي" : bmi < 30 ? "زيادة الوزن" : "سمنة";
 
   setText("#progressTodayCalories", Math.round(todayTotals.calories).toLocaleString("en-US"));
   setText("#progressTodayCaloriesTarget", `/ ${formatCompactNumber(calorieTarget)} kcal`);
   document.querySelector("#progressTodayCaloriesFill")?.style.setProperty("width", `${caloriePercent}%`);
-  setText("#stepsValue", steps.toLocaleString("en-US"));
-  document.querySelector("#stepsFill")?.style.setProperty("width", `${Math.min(percent(steps, stepsTarget), 100)}%`);
-  setText("#waterValue", waterLiters.toLocaleString("en-US"));
+  setText("#waterValue", formatWaterLiters(waterMl));
   setText("#waterPercent", `${waterPercent}%`);
   document.querySelector("#waterRing")?.style.setProperty("--water-progress", `${waterPercent * 3.6}deg`);
 
   setText("#currentWeightValue", last ? last.value.toFixed(1) : "-");
   setText("#startingWeightValue", `${startingWeight.toFixed(1)}kg`);
-  setText("#targetWeightValue", `${state.settings.targetWeight.toFixed(1)}kg`);
+  setText("#targetWeightValue", `${targetWeight.toFixed(1)}kg`);
   setText("#weightDifferenceValue", last ? `${weightDiff >= 0 ? "↑ +" : "↓ "}${Math.abs(weightDiff).toFixed(1)} kg` : "-");
   setText("#progressLastEntry", last ? `آخر تسجيل ${formatDateLong(last.date)}` : "لا يوجد تسجيل بعد");
   setText("#bmiValue", bmi ? bmi.toFixed(1) : "-");
   setText("#bmiStatus", bmi ? bmiStatus : "-");
   setText("#progressAvgCalories", Math.round(avgCalories));
   setText("#progressAdherence", `${Math.round((adherenceDays / 7) * 100)}%`);
+  document.querySelector(".weight-progress-dots")?.style.setProperty("--weight-progress", `${weightProgress}%`);
+  document.querySelector(".weight-progress-dots")?.setAttribute("title", `التقدم للهدف ${weightProgress}%`);
 
   if (!last || !previous) {
     setText("#weeklyWeightRate", "0");
@@ -596,6 +601,22 @@ function addFoodToToday(id) {
   saveAndRender("تمت إضافة الطعام لليوم");
 }
 
+function addWaterEntry() {
+  const value = prompt("أدخل كمية الماء بالمل (مثال: 250، 500، 750، 1000)", "250");
+  if (value === null) return;
+  const amount = Number(String(value).replace(/[^\d.]/g, ""));
+  if (!Number.isFinite(amount) || amount <= 0) {
+    showToast("أدخل كمية ماء صحيحة");
+    return;
+  }
+  state.waters.push({
+    id: createId(),
+    date: today,
+    amountMl: Math.round(amount)
+  });
+  saveAndRender("تمت إضافة الماء");
+}
+
 function removeItem(collection, id) {
   const index = state[collection].findIndex((item) => item.id === id);
   if (index >= 0) state[collection].splice(index, 1);
@@ -620,6 +641,12 @@ function totalsForDate(date) {
       carbs: totals.carbs + meal.carbs,
       fat: totals.fat + meal.fat
     }), { calories: 0, protein: 0, carbs: 0, fat: 0 });
+}
+
+function waterForDate(date) {
+  return (state.waters || [])
+    .filter((entry) => entry.date === date)
+    .reduce((total, entry) => total + (Number(entry.amountMl) || 0), 0);
 }
 
 function calculateStreak() {
@@ -688,15 +715,19 @@ function formatCompactNumber(value) {
   return String(Math.round(value));
 }
 
+function formatWaterLiters(valueMl) {
+  const liters = valueMl / 1000;
+  return Number.isInteger(liters) ? String(liters) : liters.toFixed(2).replace(/0$/, "");
+}
+
 function mealTemplate(meal) {
   return `
-    <div class="list-item">
-      <div>
+    <div class="list-item meal-item">
+      <div class="meal-content">
         <h4>${escapeHtml(meal.name)}</h4>
-        <p>${meal.calories} سعرة | بروتين ${meal.protein} جم | كارب ${meal.carbs} جم | دهون ${meal.fat} جم</p>
+        <p class="meal-calories">🔥 ${meal.calories} سعرة</p>
         <div class="meal-chip-row">
-          <span>🔥 ${meal.calories}</span>
-          <span>🍖 ${meal.protein}g</span>
+          <span>🍗 ${meal.protein}g</span>
           <span>🌽 ${meal.carbs}g</span>
           <span>🥑 ${meal.fat}g</span>
         </div>
@@ -839,6 +870,7 @@ function normalizeImportedState(importedState) {
     },
     meals: Array.isArray(importedState.meals) ? importedState.meals : [],
     foods: Array.isArray(importedState.foods) ? importedState.foods : [],
+    waters: Array.isArray(importedState.waters) ? importedState.waters : [],
     weights: Array.isArray(importedState.weights) ? importedState.weights : [],
     measurements: Array.isArray(importedState.measurements) ? importedState.measurements : []
   };
