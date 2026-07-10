@@ -258,7 +258,7 @@ function renderMacroBars(totals) {
   ];
   document.querySelector("#macroBars").innerHTML = macros.map(([label, value, target, color, type]) => `
     <div class="macro-row macro-card ${type}">
-      <header><span>${label}</span><strong>${value.toFixed(1)} / ${target} جم</strong></header>
+      <header><span>${label}</span><strong>${formatMacroAmount(value)} / ${target}g</strong></header>
       <div class="bar-track"><div class="bar-fill" style="width:${Math.min(percent(value, target), 100)}%;background:${color}"></div></div>
     </div>
   `).join("");
@@ -610,6 +610,10 @@ function formatWeeks(weeks) {
   if (weeks === 2) return "أسبوعين";
   if (weeks <= 10) return `${weeks} أسابيع`;
   return `${weeks} أسبوعًا`;
+}
+
+function formatMacroAmount(value) {
+  return Number(value) % 1 === 0 ? String(Math.round(value)) : value.toFixed(1);
 }
 
 function mealTemplate(meal) {
