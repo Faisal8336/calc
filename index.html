@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="theme-color" content="#f7f5ef">
+  <meta name="theme-color" content="#071225">
   <meta name="color-scheme" content="light dark">
   <meta name="description" content="تطبيق لتتبع السعرات والماكروز والوزن.">
   <meta name="mobile-web-app-capable" content="yes">
@@ -51,20 +51,30 @@
     </aside>
 
     <main class="content">
-      <header class="topbar">
-        <div>
-          <p class="eyebrow">1886.89@</p>
-          <h2 id="viewTitle">لوحة التحكم</h2>
+      <header class="topbar fitness-hero">
+        <div class="hero-copy">
+          <p class="eyebrow" id="greetingLabel">مساء النشاط</p>
+          <h2>أهلًا، <span id="userNameLabel">HolySeraph</span></h2>
+          <p class="hero-subtitle" id="viewTitle">لوحة التحكم</p>
         </div>
+        <div class="hero-icon" aria-hidden="true">◎</div>
         <div class="date-pill" id="todayLabel"></div>
       </header>
 
       <section class="view active" id="dashboard">
+        <div class="week-strip" id="weekStrip" aria-label="أيام الأسبوع"></div>
+
         <div class="summary-grid">
-          <article class="metric-card">
+          <article class="metric-card calories-card">
             <span>سعرات اليوم</span>
             <strong id="todayCalories">0</strong>
             <small id="todayCaloriesHint">من هدفك اليومي</small>
+            <div class="calorie-details">
+              <span>المستهلك</span>
+              <span>الهدف اليومي</span>
+              <span>المتبقي</span>
+            </div>
+            <div class="progress-track calorie-track"><div class="progress-fill"></div></div>
           </article>
           <article class="metric-card">
             <span>المتبقي اليوم</span>
@@ -116,6 +126,8 @@
             <div id="todayMeals"></div>
           </section>
         </div>
+
+        <button class="fab-add" id="fabAddMeal" type="button" aria-label="إضافة وجبة">+</button>
       </section>
 
       <section class="view" id="daily">
@@ -204,6 +216,45 @@
       </section>
 
       <section class="view" id="weight">
+        <section class="panel progress-hero">
+          <div class="panel-heading">
+            <h3>ملخص الوزن</h3>
+            <p id="progressLastEntry">لا يوجد تسجيل بعد</p>
+          </div>
+          <div class="weight-overview">
+            <div>
+              <span>الوزن الحالي</span>
+              <strong id="currentWeightValue">-</strong>
+            </div>
+            <div>
+              <span>الهدف</span>
+              <strong id="targetWeightValue">-</strong>
+            </div>
+            <div>
+              <span>الفرق</span>
+              <strong id="weightDifferenceValue">-</strong>
+            </div>
+          </div>
+        </section>
+
+        <div class="report-grid progress-stats">
+          <article class="metric-card">
+            <span>معدل النزول الأسبوعي</span>
+            <strong id="weeklyWeightRate">0</strong>
+            <small>كجم / أسبوع</small>
+          </article>
+          <article class="metric-card">
+            <span>متوسط السعرات</span>
+            <strong id="progressAvgCalories">0</strong>
+            <small>آخر 7 أيام</small>
+          </article>
+          <article class="metric-card">
+            <span>الالتزام الأسبوعي</span>
+            <strong id="progressAdherence">0%</strong>
+            <small>حسب الهدف اليومي</small>
+          </article>
+        </div>
+
         <div class="form-layout">
           <section class="panel">
             <div class="panel-heading">
@@ -351,6 +402,21 @@
       </section>
     </main>
   </div>
+
+  <nav class="bottom-nav" aria-label="التنقل السفلي">
+    <button class="bottom-nav-item active" data-view="dashboard" type="button">
+      <span aria-hidden="true">⌂</span>
+      <small>الرئيسية</small>
+    </button>
+    <button class="bottom-nav-item" data-view="weight" type="button">
+      <span aria-hidden="true">⌁</span>
+      <small>التقدم</small>
+    </button>
+    <button class="bottom-nav-item" data-view="settings" type="button">
+      <span aria-hidden="true">⚙</span>
+      <small>الإعدادات</small>
+    </button>
+  </nav>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script defer src="app.js"></script>
