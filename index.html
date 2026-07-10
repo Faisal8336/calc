@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="theme-color" content="#071225">
+  <meta name="theme-color" content="#f7f5ef">
   <meta name="color-scheme" content="light dark">
   <meta name="description" content="تطبيق لتتبع السعرات والماكروز والوزن.">
   <meta name="mobile-web-app-capable" content="yes">
@@ -14,7 +14,7 @@
   <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/png" href="icon.png">
   <link rel="apple-touch-icon" href="icon.png">
-  <link rel="stylesheet" href="styles.css?v=progress-layout-4">
+  <link rel="stylesheet" href="styles.css">
   <script async src="https://cdn.jsdelivr.net/npm/chart.js" onload="window.dispatchEvent(new Event('charts-ready'))"></script>
 </head>
 <body>
@@ -51,31 +51,20 @@
     </aside>
 
     <main class="content">
-      <header class="topbar fitness-hero">
-        <div class="hero-copy">
-          <h2><span id="appTitle">سعراتي</span> <span class="food-emoji" aria-hidden="true">🥗</span></h2>
-          <p class="eyebrow hero-greeting"><span id="greetingLabel">مساء النشاط</span>، <span id="userNameLabel">HolySeraph</span> 👋</p>
-          <button class="edit-name-btn" id="editNameBtn" type="button">تعديل الاسم</button>
-          <p class="hero-subtitle" id="viewTitle">لوحة التحكم</p>
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">1886.89@</p>
+          <h2 id="viewTitle">لوحة التحكم</h2>
         </div>
-        <div class="hero-icon" aria-hidden="true">0 ⚡</div>
         <div class="date-pill" id="todayLabel"></div>
       </header>
 
       <section class="view active" id="dashboard">
-        <div class="week-strip" id="weekStrip" aria-label="أيام الأسبوع"></div>
-
         <div class="summary-grid">
-          <article class="metric-card calories-card">
-            <span>السعرات الحرارية 🔥</span>
+          <article class="metric-card">
+            <span>سعرات اليوم</span>
             <strong id="todayCalories">0</strong>
             <small id="todayCaloriesHint">من هدفك اليومي</small>
-            <div class="calorie-details">
-              <span>المستهلك</span>
-              <span>الهدف اليومي</span>
-              <span>المتبقي</span>
-            </div>
-            <div class="progress-track calorie-track"><div class="progress-fill"></div></div>
           </article>
           <article class="metric-card">
             <span>المتبقي اليوم</span>
@@ -122,14 +111,11 @@
           <section class="panel today-list">
             <div class="panel-heading">
               <h3>وجبات اليوم</h3>
-              <a class="show-all-link" href="#daily">عرض الكل</a>
               <p id="mealCount">لا توجد وجبات بعد</p>
             </div>
             <div id="todayMeals"></div>
           </section>
         </div>
-
-        <button class="fab-add" id="fabAddMeal" type="button" aria-label="إضافة وجبة">+</button>
       </section>
 
       <section class="view" id="daily">
@@ -160,10 +146,9 @@
                   <input type="number" id="mealFat" min="0" step="0.1" required>
                 </label>
               </div>
-              <label class="checkbox-row switch-row">
+              <label class="checkbox-row">
                 <input type="checkbox" id="saveFood">
-                <span class="switch-control" aria-hidden="true"></span>
-                <span>حفظها في مكتبة الأطعمة</span>
+                حفظها في مكتبة الأطعمة
               </label>
               <button class="primary-btn" type="submit">إضافة الوجبة</button>
             </form>
@@ -219,94 +204,8 @@
       </section>
 
       <section class="view" id="weight">
-        <section class="progress-section daily-followup-section">
-          <header class="section-heading section-heading-row">
-            <h2>المتابعة اليومية</h2>
-            <a class="show-all-link" href="#reports">عرض المزيد</a>
-          </header>
-
-          <div class="daily-tracking-grid">
-            <article class="daily-card daily-card-calories">
-              <div class="daily-card-title">
-                <span>السعرات</span>
-                <span aria-hidden="true">🔥</span>
-              </div>
-              <div class="daily-value">
-                <strong id="progressTodayCalories">0</strong>
-                <small id="progressTodayCaloriesTarget">/ 1.9k</small>
-              </div>
-              <div class="progress-track"><div class="progress-fill" id="progressTodayCaloriesFill"></div></div>
-            </article>
-
-            <article class="daily-card daily-card-water">
-              <div class="daily-card-title">
-                <span>الماء</span>
-              </div>
-              <div class="water-ring" id="waterRing">
-                <strong id="waterPercent">0%</strong>
-                <button class="water-add" id="waterAdd" type="button" aria-label="إضافة ماء">+</button>
-              </div>
-              <p><strong id="waterValue">0</strong> / 2.8L</p>
-            </article>
-          </div>
-        </section>
-
-        <section class="progress-section current-weight-section">
-          <header class="section-heading section-heading-row">
-            <h2>الوزن الحالي</h2>
-            <a class="show-all-link" href="#reports">عرض الكل</a>
-          </header>
-
-          <section class="weight-feature-card">
-            <div class="weight-feature-main">
-              <div>
-                <strong id="currentWeightValue">-</strong>
-                <span>kg</span>
-              </div>
-              <p id="weightDifferenceValue">-</p>
-            </div>
-
-            <div class="weight-feature-action">
-              <button class="primary-btn weight-log-toggle" id="weightLogToggle" type="button">+ سجل وزن</button>
-              <p id="progressLastEntry">لا يوجد تسجيل بعد</p>
-            </div>
-
-            <div class="weight-mini-grid">
-              <div>
-                <span>البداية</span>
-                <strong id="startingWeightValue">-</strong>
-              </div>
-              <div>
-                <span>الهدف</span>
-                <strong id="targetWeightValue">-</strong>
-              </div>
-            </div>
-
-            <div class="weight-progress-dots" aria-hidden="true"></div>
-
-            <div class="bmi-block">
-              <div class="bmi-header">
-                <span>مؤشر كتلة الجسم</span>
-                <strong id="bmiValue">-</strong>
-              </div>
-              <span class="bmi-status" id="bmiStatus">-</span>
-              <div class="bmi-scale" aria-hidden="true">
-                <span class="bmi-under"></span>
-                <span class="bmi-normal"></span>
-                <span class="bmi-over"></span>
-                <span class="bmi-obese"></span>
-              </div>
-              <div class="bmi-labels">
-                <span>0</span>
-                <span>18.5</span>
-                <span>25</span>
-                <span>30</span>
-                <span>40</span>
-              </div>
-            </div>
-          </section>
-
-          <section class="panel weight-log-panel" id="weightLogPanel" hidden>
+        <div class="form-layout">
+          <section class="panel">
             <div class="panel-heading">
               <h3>تسجيل الوزن</h3>
               <p>تابع التغير بمرور الوقت</p>
@@ -322,18 +221,49 @@
             </form>
           </section>
 
-          <section class="panel progress-chart-card">
-            <div class="chart-box compact"><canvas id="progressWeightChart"></canvas></div>
+          <section class="panel">
+            <div class="panel-heading">
+              <h3>قياسات الجسم</h3>
+              <p>اختياري، بالسنتيمتر</p>
+            </div>
+            <form id="measurementForm" class="stack-form">
+              <label>التاريخ
+                <input type="date" id="measurementDate" required>
+              </label>
+              <div class="field-grid">
+                <label>الخصر
+                  <input type="number" id="waist" min="0" step="0.1">
+                </label>
+                <label>الصدر
+                  <input type="number" id="chest" min="0" step="0.1">
+                </label>
+                <label>الذراع
+                  <input type="number" id="arm" min="0" step="0.1">
+                </label>
+                <label>الفخذ
+                  <input type="number" id="thigh" min="0" step="0.1">
+                </label>
+              </div>
+              <button class="primary-btn" type="submit">حفظ القياسات</button>
+            </form>
           </section>
+        </div>
+
+        <section class="panel wide-panel">
+          <div class="panel-heading">
+            <h3>سجل الوزن</h3>
+            <p id="weightCount">لا توجد أوزان بعد</p>
+          </div>
+          <div class="item-list" id="weightHistory"></div>
         </section>
 
-        <form id="measurementForm" class="measurement-support-form" aria-hidden="true">
-          <input type="date" id="measurementDate">
-          <input type="number" id="waist" min="0" step="0.1">
-          <input type="number" id="chest" min="0" step="0.1">
-          <input type="number" id="arm" min="0" step="0.1">
-          <input type="number" id="thigh" min="0" step="0.1">
-        </form>
+        <section class="panel wide-panel">
+          <div class="panel-heading">
+            <h3>تغير القياسات</h3>
+            <p>آخر السجلات حسب التاريخ</p>
+          </div>
+          <div class="chart-box compact"><canvas id="measurementsChart"></canvas></div>
+        </section>
       </section>
 
       <section class="view" id="reports">
@@ -416,39 +346,11 @@
             </div>
             <button class="primary-btn" type="submit">حفظ الأهداف</button>
           </form>
-          <div class="data-tools">
-            <div>
-              <h3>نقل البيانات</h3>
-              <p>احفظ نسخة كاملة من سجلاتك على الجوال، أو استوردها على جهاز آخر.</p>
-            </div>
-            <div class="data-actions">
-              <button class="ghost-btn" id="exportData" type="button">حفظ ملف البيانات</button>
-              <label class="import-data-btn">
-                استيراد ملف البيانات
-                <input type="file" id="importData" accept="application/json,.json">
-              </label>
-            </div>
-          </div>
           <button class="danger-btn" id="clearData" type="button">حذف كل البيانات المحلية</button>
         </section>
       </section>
     </main>
   </div>
-
-  <nav class="bottom-nav" aria-label="التنقل السفلي">
-    <button class="bottom-nav-item active" data-view="dashboard" type="button">
-      <span aria-hidden="true">⌂</span>
-      <small>الرئيسية</small>
-    </button>
-    <button class="bottom-nav-item" data-view="weight" type="button">
-      <span aria-hidden="true">⌁</span>
-      <small>التقدم</small>
-    </button>
-    <button class="bottom-nav-item" data-view="settings" type="button">
-      <span aria-hidden="true">⚙</span>
-      <small>الإعدادات</small>
-    </button>
-  </nav>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script defer src="app.js"></script>
