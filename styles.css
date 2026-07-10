@@ -1757,4 +1757,156 @@ body[data-view="settings"] .settings-panel .panel-heading h3 {
   .weight-overview {
     grid-template-columns: 1fr;
   }
+
+  body[data-view="dashboard"] .topbar h2 {
+    font-size: 30px;
+  }
+
+  body[data-view="dashboard"] .hero-greeting {
+    font-size: 16px;
+  }
+
+  body[data-view="dashboard"] .week-day {
+    min-height: 58px;
+  }
+
+  body[data-view="dashboard"] .week-day span {
+    font-size: 12px;
+  }
+
+  body[data-view="dashboard"] .week-day strong {
+    width: 32px;
+    height: 40px;
+    border-radius: 14px;
+    font-size: 15px;
+  }
+
+  body[data-view="dashboard"] .macro-card {
+    min-height: 100px;
+    padding: 12px 8px;
+  }
+
+  body[data-view="dashboard"] .macro-card header span {
+    font-size: 18px;
+  }
+
+  body[data-view="dashboard"] .macro-card header strong {
+    font-size: 17px;
+  }
+
+  body[data-view="dashboard"] .today-list .panel-heading h3 {
+    font-size: 24px;
+  }
+
+  body[data-view="dashboard"] .empty-state {
+    min-height: 190px;
+    font-size: 20px;
+  }
+
+  body[data-view="dashboard"] .empty-state::before {
+    width: 70px;
+    height: 70px;
+    font-size: 35px;
+  }
+
+  body[data-view="weight"] .content {
+    display: grid;
+    gap: 16px;
+  }
+
+  body[data-view="weight"] .view.active {
+    display: grid;
+    gap: 16px;
+  }
+
+  body[data-view="weight"] .progress-hero,
+  body[data-view="weight"] .panel,
+  body[data-view="weight"] .metric-card {
+    overflow: visible;
+  }
+
+  body[data-view="weight"] .progress-hero {
+    margin: 0;
+    padding: 18px;
+  }
+
+  body[data-view="weight"] .panel-heading {
+    margin-bottom: 14px;
+  }
+
+  body[data-view="weight"] .panel-heading h3 {
+    font-size: 24px;
+    line-height: 1.2;
+  }
+
+  body[data-view="weight"] .panel-heading p {
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  body[data-view="weight"] .weight-overview {
+    display: grid;
+    gap: 10px;
+  }
+
+  body[data-view="weight"] .weight-overview div {
+    padding: 14px;
+    border-radius: 18px;
+  }
+
+  body[data-view="weight"] .weight-overview span {
+    margin-bottom: 6px;
+    font-size: 12px;
+  }
+
+  body[data-view="weight"] .weight-overview strong {
+    font-size: 24px;
+    line-height: 1.15;
+  }
+
+  body[data-view="weight"] .progress-stats {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin: 0;
+  }
+
+  body[data-view="weight"] .progress-stats .metric-card {
+    min-height: 96px;
+    padding: 16px;
+    border-radius: 22px;
+  }
+
+  body[data-view="weight"] .progress-stats .metric-card span,
+  body[data-view="weight"] .progress-stats .metric-card small {
+    font-size: 13px;
+    line-height: 1.4;
+  }
+
+  body[data-view="weight"] .progress-stats .metric-card strong {
+    margin: 8px 0 4px;
+    font-size: 34px;
+    line-height: 1;
+  }
+
+  body[data-view="weight"] .form-layout {
+    display: grid;
+    gap: 14px;
+  }
+
+  body[data-view="weight"] .panel {
+    padding: 16px;
+    border-radius: 22px;
+  }
+
+  body[data-view="weight"] .wide-panel {
+    min-height: 0;
+    margin: 0;
+  }
+
+  body[data-view="weight"] .chart-box,
+  body[data-view="weight"] .chart-box.compact {
+    height: 190px;
+    min-height: 190px;
+  }
 }
